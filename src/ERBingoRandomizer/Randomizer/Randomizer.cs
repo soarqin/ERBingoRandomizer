@@ -28,12 +28,12 @@ public partial class BingoRandomizer {
     private BHD5Reader _bhd5Reader;
     private IntPtr _oodlePtr;
     // FMGs
-    private BND4 _menuMsgBND;
-    private FMG _lineHelpFmg;
+    private BND4[] _menuMsgBND = new BND4[14];
+    private FMG[] _lineHelpFmg = new FMG[14];
     private FMG _menuTextFmg;
-    private FMG _weaponFmg;
+    private FMG[] _weaponFmg = new FMG[14];
     private FMG _protectorFmg;
-    private FMG _goodsFmg;
+    private FMG[] _goodsFmg = new FMG[14];
     // Params
     private List<PARAMDEF> _paramDefs;
     private Param _equipParamWeapon;
@@ -343,7 +343,7 @@ public partial class BingoRandomizer {
             }
             else {
                 ShopLineupParam newDragonIncant = getNewId(lot.equipId, shopLineupParamDragonList);
-                logItem($"{_goodsFmg[lot.equipId]} -> {_goodsFmg[newDragonIncant.equipId]}");
+                logItem($"{_goodsFmg[0][lot.equipId]} -> {_goodsFmg[0][newDragonIncant.equipId]}");
                 copyShopLineupParam(lot, newDragonIncant);
             }
         }

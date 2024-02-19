@@ -168,51 +168,74 @@ public partial class BingoRandomizer {
     private void replaceShopLineupParamMagic(ShopLineupParam lot, IReadOnlyDictionary<int, int> shopLineupParamDictionary, IList<ShopLineupParam> shopLineupParamRemembranceList) {
         if (lot.mtrlId == -1) {
             int newItem = shopLineupParamDictionary[lot.equipId];
-            logItem($"{_goodsFmg[lot.equipId]} -> {_goodsFmg[newItem]}");
+            logItem($"{_goodsFmg[0][lot.equipId]} -> {_goodsFmg[0][newItem]}");
             lot.equipId = newItem;
             return;
         }
         ShopLineupParam newRemembrance = getNewId(lot.equipId, shopLineupParamRemembranceList);
-        logItem($"{_goodsFmg[lot.equipId]} -> {_goodsFmg[newRemembrance.equipId]}");
+        logItem($"{_goodsFmg[0][lot.equipId]} -> {_goodsFmg[0][newRemembrance.equipId]}");
         copyShopLineupParam(lot, newRemembrance);
     }
     private void addDescriptionString(CharaInitParam chr, int id) {
-        List<string> str = new() {
-            $"{_weaponNameDictionary[chr.wepleft]}{getRequiredLevelsWeapon(chr, chr.wepleft)}",
-            $"{_weaponNameDictionary[chr.wepRight]}{getRequiredLevelsWeapon(chr, chr.wepRight)}",
-        };
-        if (chr.subWepLeft != -1) {
-            str.Add($"{_weaponNameDictionary[chr.subWepLeft]}{getRequiredLevelsWeapon(chr, chr.subWepLeft)}");
-        }
-        if (chr.subWepRight != -1) {
-            str.Add($"{_weaponNameDictionary[chr.subWepRight]}{getRequiredLevelsWeapon(chr, chr.subWepRight)}");
-        }
-        if (chr.subWepLeft3 != -1) {
-            str.Add($"{_weaponNameDictionary[chr.subWepLeft3]}{getRequiredLevelsWeapon(chr, chr.subWepLeft3)}");
-        }
-        if (chr.subWepRight3 != -1) {
-            str.Add($"{_weaponNameDictionary[chr.subWepRight3]}{getRequiredLevelsWeapon(chr, chr.subWepRight3)}");
-        }
-        if (chr.equipArrow != -1) {
-            str.Add($"{_weaponNameDictionary[chr.equipArrow]}[{chr.arrowNum}]");
-        }
-        if (chr.equipSubArrow != -1) {
-            str.Add($"{_weaponNameDictionary[chr.equipSubArrow]}[{chr.subArrowNum}]");
-        }
-        if (chr.equipBolt != -1) {
-            str.Add($"{_weaponNameDictionary[chr.equipBolt]}[{chr.boltNum}]");
-        }
-        if (chr.equipSubBolt != -1) {
-            str.Add($"{_weaponNameDictionary[chr.equipSubBolt]}[{chr.subBoltNum}]");
-        }
-        if (chr.equipSpell01 != -1) {
-            str.Add($"{_goodsFmg[chr.equipSpell01]}");
-        }
-        if (chr.equipSpell02 != -1) {
-            str.Add($"{_goodsFmg[chr.equipSpell02]}");
-        }
+        for (int i = 0; i < Const.ERLanguageNames.Length; i++)
+        {
+            List<string> str = new()
+            {
+                $"{_weaponFmg[i][chr.wepleft]}{getRequiredLevelsWeapon(chr, chr.wepleft)}",
+                $"{_weaponFmg[i][chr.wepRight]}{getRequiredLevelsWeapon(chr, chr.wepRight)}",
+            };
+            if (chr.subWepLeft != -1)
+            {
+                str.Add($"{_weaponFmg[i][chr.subWepLeft]}{getRequiredLevelsWeapon(chr, chr.subWepLeft)}");
+            }
 
-        _lineHelpFmg[id] = string.Join(", ", str);
+            if (chr.subWepRight != -1)
+            {
+                str.Add($"{_weaponFmg[i][chr.subWepRight]}{getRequiredLevelsWeapon(chr, chr.subWepRight)}");
+            }
+
+            if (chr.subWepLeft3 != -1)
+            {
+                str.Add($"{_weaponFmg[i][chr.subWepLeft3]}{getRequiredLevelsWeapon(chr, chr.subWepLeft3)}");
+            }
+
+            if (chr.subWepRight3 != -1)
+            {
+                str.Add($"{_weaponFmg[i][chr.subWepRight3]}{getRequiredLevelsWeapon(chr, chr.subWepRight3)}");
+            }
+
+            if (chr.equipArrow != -1)
+            {
+                str.Add($"{_weaponFmg[i][chr.equipArrow]}[{chr.arrowNum}]");
+            }
+
+            if (chr.equipSubArrow != -1)
+            {
+                str.Add($"{_weaponFmg[i][chr.equipSubArrow]}[{chr.subArrowNum}]");
+            }
+
+            if (chr.equipBolt != -1)
+            {
+                str.Add($"{_weaponFmg[i][chr.equipBolt]}[{chr.boltNum}]");
+            }
+
+            if (chr.equipSubBolt != -1)
+            {
+                str.Add($"{_weaponFmg[i][chr.equipSubBolt]}[{chr.subBoltNum}]");
+            }
+
+            if (chr.equipSpell01 != -1)
+            {
+                str.Add($"{_goodsFmg[i][chr.equipSpell01]}");
+            }
+
+            if (chr.equipSpell02 != -1)
+            {
+                str.Add($"{_goodsFmg[i][chr.equipSpell02]}");
+            }
+
+            _lineHelpFmg[i][id] = string.Join(", ", str);
+        }
     }
     private void writeFiles() {
         if (Directory.Exists(Const.BingoPath)) {
@@ -226,10 +249,13 @@ public partial class BingoRandomizer {
         setBndFile(_regulationBnd, Const.EquipParamWeaponName, _equipParamWeapon.Write());
         setBndFile(_regulationBnd, Const.AtkParamPcName, _atkParam_Pc.Write());
         SFUtil.EncryptERRegulation($"{Const.BingoPath}/{Const.RegulationName}", _regulationBnd);
-        Directory.CreateDirectory(Path.GetDirectoryName($"{Const.BingoPath}/{Const.MenuMsgBNDPath}") ?? throw new InvalidOperationException());
-        setBndFile(_menuMsgBND, Const.GR_LineHelpName, _lineHelpFmg.Write());
-        File.WriteAllBytes($"{Const.BingoPath}/{Const.MenuMsgBNDPath}", _menuMsgBND.Write());
-
+        for (int i = 0; i < Const.ERLanguageNames.Length; i++)
+        {
+            string menuMsgBndPath = $"/msg/{Const.ERLanguageNames[i]}/menu.msgbnd.dcx";
+            Directory.CreateDirectory(Path.GetDirectoryName($"{Const.BingoPath}{menuMsgBndPath}") ?? throw new InvalidOperationException());
+            setBndFile(_menuMsgBND[i], Const.GR_LineHelpName, _lineHelpFmg[i].Write());
+            File.WriteAllBytes($"{Const.BingoPath}{menuMsgBndPath}", _menuMsgBND[i].Write());
+        }
     }
     private void logReplacementDictionary(Dictionary<int, ItemLotEntry> dict) {
         foreach (KeyValuePair<int, ItemLotEntry> pair in dict) {
@@ -238,29 +264,29 @@ public partial class BingoRandomizer {
     }
     private void logReplacementDictionaryMagic(Dictionary<int, int> dict) {
         foreach (KeyValuePair<int, int> pair in dict) {
-            logItem($"{_goodsFmg[pair.Key]} -> {_goodsFmg[pair.Value]}");
+            logItem($"{_goodsFmg[0][pair.Key]} -> {_goodsFmg[0][pair.Value]}");
         }
     }
     private void logCharaInitEntry(CharaInitParam chr, int i) {
         logItem($"\n> {_menuTextFmg[i]}");
         logItem("> Weapons");
         if (chr.wepleft != -1) {
-            logItem($"Left: {_weaponFmg[chr.wepleft]}{getRequiredLevelsWeapon(chr, chr.wepleft)}");
+            logItem($"Left: {_weaponFmg[0][chr.wepleft]}{getRequiredLevelsWeapon(chr, chr.wepleft)}");
         }
         if (chr.wepRight != -1) {
-            logItem($"Right: {_weaponFmg[chr.wepRight]}{getRequiredLevelsWeapon(chr, chr.wepRight)}");
+            logItem($"Right: {_weaponFmg[0][chr.wepRight]}{getRequiredLevelsWeapon(chr, chr.wepRight)}");
         }
         if (chr.subWepLeft != -1) {
-            logItem($"Left 2: {_weaponFmg[chr.subWepLeft]}{getRequiredLevelsWeapon(chr, chr.subWepLeft)}");
+            logItem($"Left 2: {_weaponFmg[0][chr.subWepLeft]}{getRequiredLevelsWeapon(chr, chr.subWepLeft)}");
         }
         if (chr.subWepRight != -1) {
-            logItem($"Right 2: {_weaponFmg[chr.subWepRight]}{getRequiredLevelsWeapon(chr, chr.subWepRight)}");
+            logItem($"Right 2: {_weaponFmg[0][chr.subWepRight]}{getRequiredLevelsWeapon(chr, chr.subWepRight)}");
         }
         if (chr.subWepLeft3 != -1) {
-            logItem($"Left 3: {_weaponFmg[chr.subWepLeft3]}{getRequiredLevelsWeapon(chr, chr.subWepLeft3)}");
+            logItem($"Left 3: {_weaponFmg[0][chr.subWepLeft3]}{getRequiredLevelsWeapon(chr, chr.subWepLeft3)}");
         }
         if (chr.subWepRight3 != -1) {
-            logItem($"Right 3: {_weaponFmg[chr.subWepRight3]}{getRequiredLevelsWeapon(chr, chr.subWepRight3)}");
+            logItem($"Right 3: {_weaponFmg[0][chr.subWepRight3]}{getRequiredLevelsWeapon(chr, chr.subWepRight3)}");
         }
 
         logItem("\n> Armor");
@@ -282,26 +308,26 @@ public partial class BingoRandomizer {
         if (chr.equipArrow != -1 || chr.equipSubArrow != -1 || chr.equipBolt != -1 || chr.equipSubBolt != -1) {
             logItem("\n> Ammo");
             if (chr.equipArrow != -1) {
-                logItem($"{_weaponFmg[chr.equipArrow]}[{chr.arrowNum}]");
+                logItem($"{_weaponFmg[0][chr.equipArrow]}[{chr.arrowNum}]");
             }
             if (chr.equipSubArrow != -1) {
-                logItem($"{_weaponFmg[chr.equipSubArrow]}[{chr.subArrowNum}]");
+                logItem($"{_weaponFmg[0][chr.equipSubArrow]}[{chr.subArrowNum}]");
             }
             if (chr.equipBolt != -1) {
-                logItem($"{_weaponFmg[chr.equipBolt]}[{chr.boltNum}]");
+                logItem($"{_weaponFmg[0][chr.equipBolt]}[{chr.boltNum}]");
             }
             if (chr.equipSubBolt != -1) {
-                logItem($"{_weaponFmg[chr.equipSubBolt]}[{chr.subBoltNum}]");
+                logItem($"{_weaponFmg[0][chr.equipSubBolt]}[{chr.subBoltNum}]");
             }
         }
 
         if (chr.equipSpell01 != -1 || chr.equipSpell02 != -1) {
             logItem("\n> Spells");
             if (chr.equipSpell01 != -1) {
-                logItem($"{_goodsFmg[chr.equipSpell01]}{getRequiredLevelsSpell(chr, chr.equipSpell01)}");
+                logItem($"{_goodsFmg[0][chr.equipSpell01]}{getRequiredLevelsSpell(chr, chr.equipSpell01)}");
             }
             if (chr.equipSpell02 != -1) {
-                logItem($"{_goodsFmg[chr.equipSpell02]}{getRequiredLevelsSpell(chr, chr.equipSpell02)}");
+                logItem($"{_goodsFmg[0][chr.equipSpell02]}{getRequiredLevelsSpell(chr, chr.equipSpell02)}");
             }
         }
 

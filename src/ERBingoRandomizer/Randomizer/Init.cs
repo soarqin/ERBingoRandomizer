@@ -71,24 +71,37 @@ public partial class BingoRandomizer {
         }
     }
     private void getFmgs() {
-        byte[] itemMsgBndBytes = getOrOpenFile(Const.ItemMsgBNDPath);
-        if (itemMsgBndBytes == null) {
-            throw new InvalidFileException(Const.ItemMsgBNDPath);
-        }
-        BND4 itemBnd = BND4.Read(itemMsgBndBytes);
-        foreach (BinderFile file in itemBnd.Files) {
-            getFmgs(file);
-        }
+        for (int i = 0; i < 14; i++)
+        {
+            string filename = $"/msg/{Const.ERLanguageNames[i]}/item.msgbnd.dcx";
+            byte[] itemMsgBndBytes = getOrOpenFile(filename);
+            if (itemMsgBndBytes == null)
+            {
+                throw new InvalidFileException(filename);
+            }
 
-        _cancellationToken.ThrowIfCancellationRequested();
+            BND4 itemBnd = BND4.Read(itemMsgBndBytes);
+            foreach (BinderFile file in itemBnd.Files)
+            {
+                if (i == 0) getFmgs(file);
+                getFmgs(file, i);
+            }
 
-        byte[] menuMsgBndBytes = getOrOpenFile(Const.MenuMsgBNDPath);
-        if (itemMsgBndBytes == null) {
-            throw new InvalidFileException(Const.MenuMsgBNDPath);
-        }
-        _menuMsgBND = BND4.Read(menuMsgBndBytes);
-        foreach (BinderFile file in _menuMsgBND.Files) {
-            getFmgs(file);
+            _cancellationToken.ThrowIfCancellationRequested();
+
+            filename = $"/msg/{Const.ERLanguageNames[i]}/menu.msgbnd.dcx";
+            byte[] menuMsgBndBytes = getOrOpenFile(filename);
+            if (itemMsgBndBytes == null)
+            {
+                throw new InvalidFileException(filename);
+            }
+
+            _menuMsgBND[i] = BND4.Read(menuMsgBndBytes);
+            foreach (BinderFile file in _menuMsgBND[i].Files)
+            {
+                if (i == 0) getFmgs(file);
+                getFmgs(file, i);
+            }
         }
     }
     private byte[] getOrOpenFile(string path) {
@@ -107,7 +120,7 @@ public partial class BingoRandomizer {
         _weaponNameDictionary = new Dictionary<int, string>();
 
         foreach (Param.Row row in _equipParamWeapon.Rows) {
-            string rowString = _weaponFmg[row.ID];
+            string rowString = _weaponFmg[0][row.ID];
             if ((int)row["sortId"]!.Value.Value == 9999999 || string.IsNullOrWhiteSpace(rowString) || rowString.ToLower().Contains("[error]")) {
                 continue;
             }
@@ -169,7 +182,7 @@ public partial class BingoRandomizer {
         _goodsDictionary = new Dictionary<int, EquipParamGoods>();
         foreach (Param.Row row in _equipParamGoods.Rows) {
             int sortId = (int)row["sortId"]!.Value.Value;
-            string rowString = _goodsFmg[row.ID];
+            string rowString = _goodsFmg[0][row.ID];
             if (sortId == 9999999 || sortId == 0 || string.IsNullOrWhiteSpace(rowString) || rowString.ToLower().Contains("[error]")) {
                 continue;
             }
@@ -181,7 +194,7 @@ public partial class BingoRandomizer {
         _magicDictionary = new Dictionary<int, Magic>();
         _magicTypeDictionary = new Dictionary<byte, List<Param.Row>>();
         foreach (Param.Row row in _goodsParam.Rows) {
-            string rowString = _goodsFmg[row.ID];
+            string rowString = _goodsFmg[0][row.ID];
             if (!_goodsDictionary.TryGetValue(row.ID, out EquipParamGoods? good) || string.IsNullOrWhiteSpace(rowString) || rowString.ToLower().Contains("[error]")) {
                 continue;
             }
@@ -292,20 +305,25 @@ public partial class BingoRandomizer {
     private void getFmgs(BinderFile file) {
         string fileName = Path.GetFileName(file.Name);
         switch (fileName) {
-            case Const.WeaponNameName:
-                _weaponFmg = FMG.Read(file.Bytes);
-                break;
             case Const.ProtectorNameName:
                 _protectorFmg = FMG.Read(file.Bytes);
                 break;
-            case Const.GoodsNameName:
-                _goodsFmg = FMG.Read(file.Bytes);
-                break;
-            case Const.GR_LineHelpName:
-                _lineHelpFmg = FMG.Read(file.Bytes);
-                break;
             case Const.GR_MenuTextName:
                 _menuTextFmg = FMG.Read(file.Bytes);
+                break;
+        }
+    }
+    private void getFmgs(BinderFile file, int index) {
+        string fileName = Path.GetFileName(file.Name);
+        switch (fileName) {
+            case Const.WeaponNameName:
+                _weaponFmg[index] = FMG.Read(file.Bytes);
+                break;
+            case Const.GoodsNameName:
+                _goodsFmg[index] = FMG.Read(file.Bytes);
+                break;
+            case Const.GR_LineHelpName:
+                _lineHelpFmg[index] = FMG.Read(file.Bytes);
                 break;
         }
     }

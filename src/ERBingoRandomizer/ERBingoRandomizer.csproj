@@ -65,20 +65,14 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BouncyCastle" Version="1.8.9" />
+        <PackageReference Include="BouncyCastle.Cryptography" Version="2.3.0" />
         <PackageReference Include="SharpZipLib" Version="1.4.2" />
         <PackageReference Include="System.Drawing.Common" Version="8.0.0-preview.5.23280.5" />
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="System.Drawing">
-            <HintPath>..\..\..\..\..\..\..\..\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Drawing.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Drawing.Primitives">
-            <HintPath>..\..\..\..\..\..\..\..\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Drawing.Primitives.dll</HintPath>
-        </Reference>
         <Reference Include="System.Windows.Forms">
-            <HintPath>..\..\..\..\..\..\..\..\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Windows.Forms.dll</HintPath>
+            <HintPath>C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Windows.Forms.dll</HintPath>
         </Reference>
     </ItemGroup>
 
