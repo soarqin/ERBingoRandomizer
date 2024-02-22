@@ -71,7 +71,7 @@ public partial class BingoRandomizer {
         }
     }
     private void getFmgs() {
-        for (int i = 0; i < 14; i++)
+        for (int i = 0; i < Const.ERLanguageCount; i++)
         {
             string filename = $"/msg/{Const.ERLanguageNames[i]}/item.msgbnd.dcx";
             byte[] itemMsgBndBytes = getOrOpenFile(filename);

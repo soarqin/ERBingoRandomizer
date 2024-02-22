@@ -16,36 +16,36 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <StackPanel>
-            <Label Margin="0,25" Content="Path to Elden Ring exe" HorizontalAlignment="Center" FontWeight="UltraBlack" />
+            <Label Margin="0,25" Content="艾尔登法环exe路径(请选择eldenring.exe)" HorizontalAlignment="Center" FontWeight="UltraBlack" />
             <TextBox Margin="100,0,100,0" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" 
                      FontSize="13" FontWeight="Bold"/>
-            <Label Margin="0,25" Content="Seed" HorizontalAlignment="Center" FontWeight="UltraBlack" />
+            <Label Margin="0,25" Content="种子" HorizontalAlignment="Center" FontWeight="UltraBlack" />
             <TextBox Margin="100,0,100,0" Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}"
                      FontSize="13" FontWeight="Bold"/>
             <Separator Margin="0,25,0,0" />
             
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Label Content="Current Seed:" FontWeight="Medium"/>
+                <Label Content="当前种子:" FontWeight="Medium"/>
                 <Label Content="{Binding LastSeedText}" FontWeight="Black" Foreground="YellowGreen" />
             </StackPanel>
             
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Grid>
-                    <Button Width="150" Height="50" Content="Cancel" Command="{Binding Cancel}"
+                    <Button Width="150" Height="50" Content="取消" Command="{Binding Cancel}"
                             Visibility="{Binding InProgress, Converter={StaticResource BoolToVisibilityConverter}}"
                             FontWeight="Bold"/>
-                    <Button Width="150" Height="50" Content="Randomize" Command="{Binding RandomizeBingo}" 
+                    <Button Width="150" Height="50" Content="进行随机" Command="{Binding RandomizeBingo}" 
                             Visibility="{Binding InProgress, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                             FontWeight="Bold"/>
                 </Grid>
                 <Separator Margin="50,0,0,0" />
-                <Button Width="150" Height="50" Content="Bingo!" Command="{Binding LaunchEldenRing}" FontWeight="Bold"/>
+                <Button Width="150" Height="50" Content="启动Bingo!" Command="{Binding LaunchEldenRing}" FontWeight="Bold"/>
                 <Separator Margin="50,0,0,0" />
                 <Grid>
-                    <Button Width="150" Height="50" Content="Cancel" Command="{Binding Cancel}"
+                    <Button Width="150" Height="50" Content="取消" Command="{Binding Cancel}"
                             Visibility="{Binding Packaging, Converter={StaticResource BoolToVisibilityConverter}}"
                             FontWeight="Bold"/>
-                    <Button Width="150" Height="50" Content="Package Files" Command="{Binding PackageFiles}" 
+                    <Button Width="150" Height="50" Content="打包MOD文件" Command="{Binding PackageFiles}" 
                             Visibility="{Binding Packaging, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                             FontWeight="Bold"/>
                 </Grid>

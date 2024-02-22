@@ -32,7 +32,8 @@ public static class Const {
     public const string GR_LineHelpName = "GR_LineHelp.fmg";
     public const string GR_MenuTextName = "GR_MenuText.fmg";
     public static readonly string[] ERLanguageNames =
-    { "engus", "deude", "frafr", "itait", "spaar", "spaes", "polpl", "porbr", "rusru", "thath", "jpnjp", "korkr", "zhocn", "zhotw" };
+    { "engus", /*"deude", "frafr", "itait", "spaar", "spaes", "polpl", "porbr", "rusru", "thath", "jpnjp", "korkr",*/ "zhocn", "zhotw" };
+    public const int ERLanguageCount = 3;
     // Gear Randomizer  
     public const int NoItem = -1;
     public const byte HelmType = 0;

@@ -105,7 +105,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
 
     public CancellationTokenSource CancellationTokenSource { get; private set; }
     public CancellationToken CancellationToken { get; private set; }
-    public string LastSeedText => string.IsNullOrWhiteSpace(Seed) ? "Unknown Seed" : Seed;
+    public string LastSeedText => string.IsNullOrWhiteSpace(Seed) ? "未知种子" : Seed;
     private SeedInfo? _lastSeed;
     public SeedInfo? LastSeed {
         get => _lastSeed;

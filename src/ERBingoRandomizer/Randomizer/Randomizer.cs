@@ -28,12 +28,12 @@ public partial class BingoRandomizer {
     private BHD5Reader _bhd5Reader;
     private IntPtr _oodlePtr;
     // FMGs
-    private BND4[] _menuMsgBND = new BND4[14];
-    private FMG[] _lineHelpFmg = new FMG[14];
+    private BND4[] _menuMsgBND = new BND4[Const.ERLanguageCount];
+    private FMG[] _lineHelpFmg = new FMG[Const.ERLanguageCount];
     private FMG _menuTextFmg;
-    private FMG[] _weaponFmg = new FMG[14];
+    private FMG[] _weaponFmg = new FMG[Const.ERLanguageCount];
     private FMG _protectorFmg;
-    private FMG[] _goodsFmg = new FMG[14];
+    private FMG[] _goodsFmg = new FMG[Const.ERLanguageCount];
     // Params
     private List<PARAMDEF> _paramDefs;
     private Param _equipParamWeapon;
