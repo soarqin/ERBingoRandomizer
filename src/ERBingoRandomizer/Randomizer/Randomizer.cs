@@ -263,7 +263,7 @@ public partial class BingoRandomizer {
             Console.WriteLine($"{type}");
             foreach (ItemLotEntry itemLotEntry in list) {
                 int id = RemoveWeaponLevels(itemLotEntry.Id);
-                string name = _resources.WeaponFmg[id];
+                string name = _resources.WeaponFmg[0][id];
                 if (string.IsNullOrWhiteSpace(name)) {
                     name = $"{_resources.WeaponNameDictionary[itemLotEntry.Id]}";
                 }
@@ -402,7 +402,7 @@ public partial class BingoRandomizer {
             }
             else {
                 ShopLineupParam newDragonIncant = getNewId(lot.equipId, shopLineupParamDragonList);
-                Logger.LogItem($"{_resources.GoodsFmg[lot.equipId]} -> {_resources.GoodsFmg[newDragonIncant.equipId]}");
+                Logger.LogItem($"{_resources.GoodsFmg[0][lot.equipId]} -> {_resources.GoodsFmg[0][newDragonIncant.equipId]}");
                 copyShopLineupParam(lot, newDragonIncant);
             }
         }

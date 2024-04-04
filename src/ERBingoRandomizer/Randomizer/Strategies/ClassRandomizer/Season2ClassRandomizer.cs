@@ -336,22 +336,22 @@ public class Season2ClassRandomizer : IBingoClassStrategy {
         Logger.LogItem($"\n> {_resources.MenuTextFmg[i]}");
         Logger.LogItem("> Weapons");
         if (chr.wepleft != -1) {
-            Logger.LogItem($"Left: {_resources.WeaponFmg[chr.wepleft]}{getRequiredLevelsWeapon(chr, chr.wepleft)}");
+            Logger.LogItem($"Left: {_resources.WeaponFmg[0][chr.wepleft]}{getRequiredLevelsWeapon(chr, chr.wepleft)}");
         }
         if (chr.wepRight != -1) {
-            Logger.LogItem($"Right: {_resources.WeaponFmg[chr.wepRight]}{getRequiredLevelsWeapon(chr, chr.wepRight)}");
+            Logger.LogItem($"Right: {_resources.WeaponFmg[0][chr.wepRight]}{getRequiredLevelsWeapon(chr, chr.wepRight)}");
         }
         if (chr.subWepLeft != -1) {
-            Logger.LogItem($"Left 2: {_resources.WeaponFmg[chr.subWepLeft]}{getRequiredLevelsWeapon(chr, chr.subWepLeft)}");
+            Logger.LogItem($"Left 2: {_resources.WeaponFmg[0][chr.subWepLeft]}{getRequiredLevelsWeapon(chr, chr.subWepLeft)}");
         }
         if (chr.subWepRight != -1) {
-            Logger.LogItem($"Right 2: {_resources.WeaponFmg[chr.subWepRight]}{getRequiredLevelsWeapon(chr, chr.subWepRight)}");
+            Logger.LogItem($"Right 2: {_resources.WeaponFmg[0][chr.subWepRight]}{getRequiredLevelsWeapon(chr, chr.subWepRight)}");
         }
         if (chr.subWepLeft3 != -1) {
-            Logger.LogItem($"Left 3: {_resources.WeaponFmg[chr.subWepLeft3]}{getRequiredLevelsWeapon(chr, chr.subWepLeft3)}");
+            Logger.LogItem($"Left 3: {_resources.WeaponFmg[0][chr.subWepLeft3]}{getRequiredLevelsWeapon(chr, chr.subWepLeft3)}");
         }
         if (chr.subWepRight3 != -1) {
-            Logger.LogItem($"Right 3: {_resources.WeaponFmg[chr.subWepRight3]}{getRequiredLevelsWeapon(chr, chr.subWepRight3)}");
+            Logger.LogItem($"Right 3: {_resources.WeaponFmg[0][chr.subWepRight3]}{getRequiredLevelsWeapon(chr, chr.subWepRight3)}");
         }
 
         Logger.LogItem("\n> Armor");
@@ -373,68 +373,69 @@ public class Season2ClassRandomizer : IBingoClassStrategy {
         if (chr.equipArrow != -1 || chr.equipSubArrow != -1 || chr.equipBolt != -1 || chr.equipSubBolt != -1) {
             Logger.LogItem("\n> Ammo");
             if (chr.equipArrow != -1) {
-                Logger.LogItem($"{_resources.WeaponFmg[chr.equipArrow]}[{chr.arrowNum}]");
+                Logger.LogItem($"{_resources.WeaponFmg[0][chr.equipArrow]}[{chr.arrowNum}]");
             }
             if (chr.equipSubArrow != -1) {
-                Logger.LogItem($"{_resources.WeaponFmg[chr.equipSubArrow]}[{chr.subArrowNum}]");
+                Logger.LogItem($"{_resources.WeaponFmg[0][chr.equipSubArrow]}[{chr.subArrowNum}]");
             }
             if (chr.equipBolt != -1) {
-                Logger.LogItem($"{_resources.WeaponFmg[chr.equipBolt]}[{chr.boltNum}]");
+                Logger.LogItem($"{_resources.WeaponFmg[0][chr.equipBolt]}[{chr.boltNum}]");
             }
             if (chr.equipSubBolt != -1) {
-                Logger.LogItem($"{_resources.WeaponFmg[chr.equipSubBolt]}[{chr.subBoltNum}]");
+                Logger.LogItem($"{_resources.WeaponFmg[0][chr.equipSubBolt]}[{chr.subBoltNum}]");
             }
         }
 
         if (chr.equipSpell01 != -1 || chr.equipSpell02 != -1) {
             Logger.LogItem("\n> Spells");
             if (chr.equipSpell01 != -1) {
-                Logger.LogItem($"{_resources.GoodsFmg[chr.equipSpell01]}{getRequiredLevelsSpell(chr, chr.equipSpell01)}");
+                Logger.LogItem($"{_resources.GoodsFmg[0][chr.equipSpell01]}{getRequiredLevelsSpell(chr, chr.equipSpell01)}");
             }
             if (chr.equipSpell02 != -1) {
-                Logger.LogItem($"{_resources.GoodsFmg[chr.equipSpell02]}{getRequiredLevelsSpell(chr, chr.equipSpell02)}");
+                Logger.LogItem($"{_resources.GoodsFmg[0][chr.equipSpell02]}{getRequiredLevelsSpell(chr, chr.equipSpell02)}");
             }
         }
 
         Logger.LogItem("");
     }
     private void addDescriptionString(Params.CharaInitParam chr, int id) {
-        List<string> str = new() {
-            $"{_resources.WeaponNameDictionary[chr.wepleft]}{getRequiredLevelsWeapon(chr, chr.wepleft)}",
-            $"{_resources.WeaponNameDictionary[chr.wepRight]}{getRequiredLevelsWeapon(chr, chr.wepRight)}",
-        };
-        if (chr.subWepLeft != -1) {
-            str.Add($"{_resources.WeaponNameDictionary[chr.subWepLeft]}{getRequiredLevelsWeapon(chr, chr.subWepLeft)}");
+        for (var i = 0; i < Const.ERLanguageCount; i++) {
+            List<string> str = new() {
+                $"{_resources.WeaponFmg[i][chr.wepleft]}{getRequiredLevelsWeapon(chr, chr.wepleft)}",
+                $"{_resources.WeaponFmg[i][chr.wepRight]}{getRequiredLevelsWeapon(chr, chr.wepRight)}",
+            };
+            if (chr.subWepLeft != -1) {
+                str.Add($"{_resources.WeaponFmg[i][chr.subWepLeft]}{getRequiredLevelsWeapon(chr, chr.subWepLeft)}");
+            }
+            if (chr.subWepRight != -1) {
+                str.Add($"{_resources.WeaponFmg[i][chr.subWepRight]}{getRequiredLevelsWeapon(chr, chr.subWepRight)}");
+            }
+            if (chr.subWepLeft3 != -1) {
+                str.Add($"{_resources.WeaponFmg[i][chr.subWepLeft3]}{getRequiredLevelsWeapon(chr, chr.subWepLeft3)}");
+            }
+            if (chr.subWepRight3 != -1) {
+                str.Add($"{_resources.WeaponFmg[i][chr.subWepRight3]}{getRequiredLevelsWeapon(chr, chr.subWepRight3)}");
+            }
+            if (chr.equipArrow != -1) {
+                str.Add($"{_resources.WeaponFmg[i][chr.equipArrow]}[{chr.arrowNum}]");
+            }
+            if (chr.equipSubArrow != -1) {
+                str.Add($"{_resources.WeaponFmg[i][chr.equipSubArrow]}[{chr.subArrowNum}]");
+            }
+            if (chr.equipBolt != -1) {
+                str.Add($"{_resources.WeaponFmg[i][chr.equipBolt]}[{chr.boltNum}]");
+            }
+            if (chr.equipSubBolt != -1) {
+                str.Add($"{_resources.WeaponFmg[i][chr.equipSubBolt]}[{chr.subBoltNum}]");
+            }
+            if (chr.equipSpell01 != -1) {
+                str.Add($"{_resources.GoodsFmg[i][chr.equipSpell01]}");
+            }
+            if (chr.equipSpell02 != -1) {
+                str.Add($"{_resources.GoodsFmg[i][chr.equipSpell02]}");
+            }
+            _resources.LineHelpFmg[i][id] = string.Join(", ", str);
         }
-        if (chr.subWepRight != -1) {
-            str.Add($"{_resources.WeaponNameDictionary[chr.subWepRight]}{getRequiredLevelsWeapon(chr, chr.subWepRight)}");
-        }
-        if (chr.subWepLeft3 != -1) {
-            str.Add($"{_resources.WeaponNameDictionary[chr.subWepLeft3]}{getRequiredLevelsWeapon(chr, chr.subWepLeft3)}");
-        }
-        if (chr.subWepRight3 != -1) {
-            str.Add($"{_resources.WeaponNameDictionary[chr.subWepRight3]}{getRequiredLevelsWeapon(chr, chr.subWepRight3)}");
-        }
-        if (chr.equipArrow != -1) {
-            str.Add($"{_resources.WeaponNameDictionary[chr.equipArrow]}[{chr.arrowNum}]");
-        }
-        if (chr.equipSubArrow != -1) {
-            str.Add($"{_resources.WeaponNameDictionary[chr.equipSubArrow]}[{chr.subArrowNum}]");
-        }
-        if (chr.equipBolt != -1) {
-            str.Add($"{_resources.WeaponNameDictionary[chr.equipBolt]}[{chr.boltNum}]");
-        }
-        if (chr.equipSubBolt != -1) {
-            str.Add($"{_resources.WeaponNameDictionary[chr.equipSubBolt]}[{chr.subBoltNum}]");
-        }
-        if (chr.equipSpell01 != -1) {
-            str.Add($"{_resources.GoodsFmg[chr.equipSpell01]}");
-        }
-        if (chr.equipSpell02 != -1) {
-            str.Add($"{_resources.GoodsFmg[chr.equipSpell02]}");
-        }
-
-        _resources.LineHelpFmg[id] = string.Join(", ", str);
     }
     private string getRequiredLevelsWeapon(Params.CharaInitParam chr, int id) {
         EquipParamWeapon wep = _resources.WeaponDictionary[id];

@@ -85,12 +85,12 @@ public partial class BingoRandomizer {
     private void replaceShopLineupParamMagic(ShopLineupParam lot, IReadOnlyDictionary<int, int> shopLineupParamDictionary, IList<ShopLineupParam> shopLineupParamRemembranceList) {
         if (lot.mtrlId == -1) {
             int newItem = shopLineupParamDictionary[lot.equipId];
-            Logger.LogItem($"{_resources.GoodsFmg[lot.equipId]} -> {_resources.GoodsFmg[newItem]}");
+            Logger.LogItem($"{_resources.GoodsFmg[0][lot.equipId]} -> {_resources.GoodsFmg[0][newItem]}");
             lot.equipId = newItem;
             return;
         }
         ShopLineupParam newRemembrance = getNewId(lot.equipId, shopLineupParamRemembranceList);
-        Logger.LogItem($"{_resources.GoodsFmg[lot.equipId]} -> {_resources.GoodsFmg[newRemembrance.equipId]}");
+        Logger.LogItem($"{_resources.GoodsFmg[0][lot.equipId]} -> {_resources.GoodsFmg[0][newRemembrance.equipId]}");
         copyShopLineupParam(lot, newRemembrance);
     }
     private void writeFiles() {
@@ -106,9 +106,12 @@ public partial class BingoRandomizer {
         setBndFile(_resources.RegulationBnd, Const.EquipMtrlSetParamName, _resources.EquipMtrlSetParam.Write());
         setBndFile(_resources.RegulationBnd, Const.AtkParamPcName, _resources.AtkParamPc.Write());
         SFUtil.EncryptERRegulation($"{Const.BingoPath}/{Const.RegulationName}", _resources.RegulationBnd);
-        Directory.CreateDirectory(Path.GetDirectoryName($"{Const.BingoPath}/{Const.MenuMsgBNDPath}") ?? throw new InvalidOperationException());
-        setBndFile(_resources.MenuMsgBnd, Const.GR_LineHelpName, _resources.LineHelpFmg.Write());
-        File.WriteAllBytes($"{Const.BingoPath}/{Const.MenuMsgBNDPath}", _resources.MenuMsgBnd.Write());
+        for (var i = 0; i < Const.ERLanguageCount; i++) {
+            var menuMsgBndPath = $"/msg/{Const.ERLanguageNames[i]}/menu.msgbnd.dcx";
+            Directory.CreateDirectory(Path.GetDirectoryName($"{Const.BingoPath}/{menuMsgBndPath}") ?? throw new InvalidOperationException());
+            setBndFile(_resources.MenuMsgBnd[i], Const.GR_LineHelpName, _resources.LineHelpFmg[i].Write());
+            File.WriteAllBytes($"{Const.BingoPath}/{menuMsgBndPath}", _resources.MenuMsgBnd[i].Write());
+        }
         Directory.CreateDirectory(Path.GetDirectoryName($"{Const.BingoPath}/{Const.CommonEventPath}") ?? throw new InvalidOperationException());
         File.WriteAllBytes($"{Const.BingoPath}/{Const.CommonEventPath}", _resources.CommonEmevd.Write());
     }
@@ -119,7 +122,7 @@ public partial class BingoRandomizer {
     }
     private void logReplacementDictionaryMagic(Dictionary<int, int> dict) {
         foreach (KeyValuePair<int, int> pair in dict) {
-            Logger.LogItem($"{_resources.GoodsFmg[pair.Key]} -> {_resources.GoodsFmg[pair.Value]}");
+            Logger.LogItem($"{_resources.GoodsFmg[0][pair.Key]} -> {_resources.GoodsFmg[0][pair.Value]}");
         }
     }
     private void logShopId(int rowId) {

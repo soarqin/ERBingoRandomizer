@@ -17,6 +17,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
     private readonly FileSystemWatcher _watcher;
     public MainWindowViewModel() {
         RandomizeBingo = new RandomizeBingoCommand(this);
+        LaunchEldenRingNormal = new LaunchEldenRingNormalCommand(this);
         LaunchEldenRing = new LaunchEldenRingCommand(this);
         PackageFiles = new PackageFilesCommand(this);
         Cancel = new CancelCommand(this);
@@ -86,6 +87,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
     }
 
     public ICommand RandomizeBingo { get; }
+    public ICommand LaunchEldenRingNormal { get; }
     public ICommand LaunchEldenRing { get; }
     public ICommand PackageFiles { get; }
     public ICommand Cancel { get; }
@@ -105,7 +107,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
 
     public CancellationTokenSource CancellationTokenSource { get; private set; }
     public CancellationToken CancellationToken { get; private set; }
-    public string LastSeedText => string.IsNullOrWhiteSpace(Seed) ? "Unknown Seed" : Seed;
+    public string LastSeedText => string.IsNullOrWhiteSpace(Seed) ? "未知种子" : Seed;
     private SeedInfo? _lastSeed;
     public SeedInfo? LastSeed {
         get => _lastSeed;
