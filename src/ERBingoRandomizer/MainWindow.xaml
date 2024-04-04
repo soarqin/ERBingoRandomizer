@@ -5,48 +5,39 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:ERBingoRandomizer.ViewModels"
         mc:Ignorable="d"
-        Title="Bingo Randomizer" Height="600" Width="1000" ResizeMode="CanResizeWithGrip" MaxWidth="1000" MinWidth="1000" MinHeight="600"
-        Background="DimGray">
+        Title="Bingo Randomizer" Height="400" Width="600" Background="DimGray">
     <Window.DataContext>
         <viewModels:MainWindowViewModel x:Name="MainWindowViewModel" />
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="315" />
+            <RowDefinition Height="235" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <StackPanel>
-            <Label Margin="0,25" Content="Path to Elden Ring exe" HorizontalAlignment="Center" FontWeight="UltraBlack" />
-            <TextBox Margin="100,0,100,0" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" 
+            <Separator Margin="0,20,0,0" />
+            <Label Margin="0,5" Content="艾尔登法环exe路径(请选择eldenring.exe)" HorizontalAlignment="Center" FontWeight="UltraBlack" />
+            <TextBox Margin="50,0,50,0" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" 
                      FontSize="13" FontWeight="Bold"/>
-            <Label Margin="0,25" Content="Seed" HorizontalAlignment="Center" FontWeight="UltraBlack" />
-            <TextBox Margin="100,0,100,0" Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}"
+            <Label Margin="0,5" Content="种子" HorizontalAlignment="Center" FontWeight="UltraBlack" />
+            <TextBox Margin="200,0,200,0" Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}"
                      FontSize="13" FontWeight="Bold"/>
             <Separator Margin="0,25,0,0" />
             
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Label Content="Current Seed:" FontWeight="Medium"/>
+                <Label Content="当前种子:" FontWeight="Medium"/>
                 <Label Content="{Binding LastSeedText}" FontWeight="Black" Foreground="YellowGreen" />
             </StackPanel>
             
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Width="150" Height="40" Content="启动正常游戏!" Command="{Binding LaunchEldenRingNormal}" FontWeight="Bold"/>
+                <Separator Margin="100,0,0,0" />
                 <Grid>
-                    <Button Width="150" Height="50" Content="Cancel" Command="{Binding Cancel}"
+                    <Button Width="150" Height="40" Content="取消" Command="{Binding Cancel}"
                             Visibility="{Binding InProgress, Converter={StaticResource BoolToVisibilityConverter}}"
                             FontWeight="Bold"/>
-                    <Button Width="150" Height="50" Content="Randomize" Command="{Binding RandomizeBingo}" 
+                    <Button Width="150" Height="40" Content="启动随机mod!" Command="{Binding RandomizeBingo}" 
                             Visibility="{Binding InProgress, Converter={StaticResource InverseBoolToVisibilityConverter}}"
-                            FontWeight="Bold"/>
-                </Grid>
-                <Separator Margin="50,0,0,0" />
-                <Button Width="150" Height="50" Content="Bingo!" Command="{Binding LaunchEldenRing}" FontWeight="Bold"/>
-                <Separator Margin="50,0,0,0" />
-                <Grid>
-                    <Button Width="150" Height="50" Content="Cancel" Command="{Binding Cancel}"
-                            Visibility="{Binding Packaging, Converter={StaticResource BoolToVisibilityConverter}}"
-                            FontWeight="Bold"/>
-                    <Button Width="150" Height="50" Content="Package Files" Command="{Binding PackageFiles}" 
-                            Visibility="{Binding Packaging, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                             FontWeight="Bold"/>
                 </Grid>
             </StackPanel>
