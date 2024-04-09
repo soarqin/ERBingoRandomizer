@@ -58,7 +58,7 @@ public class LaunchEldenRingNormalCommand : CommandBase {
         _mwViewModel.PropertyChanged += ViewModel_PropertyChanged;
     }
     public override bool CanExecute(object? parameter) {
-        return _mwViewModel.FilesReady && !_mwViewModel.InProgress;
+        return true;
     }
     public override void Execute(object? parameter) {
         if (EldenRingIsOpen()) {

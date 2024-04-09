@@ -6,7 +6,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Windows.Forms;
 using System.Xml;
 
 namespace ERBingoRandomizer.Utility;
