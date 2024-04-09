@@ -4,50 +4,90 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:ERBingoRandomizer.ViewModels"
-        mc:Ignorable="d"
-        Title="Bingo Randomizer" Height="400" Width="600" Background="DimGray">
+        mc:Ignorable="d" ResizeMode="NoResize"
+        Title="Bingo Randomizer" Height="450" Width="600" Background="DimGray">
     <Window.DataContext>
         <viewModels:MainWindowViewModel x:Name="MainWindowViewModel" />
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="235" />
+            <RowDefinition Height="285" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <StackPanel>
-            <Separator Margin="0,20,0,0" />
-            <Label Margin="0,5" Content="艾尔登法环exe路径(请选择eldenring.exe)" HorizontalAlignment="Center" FontWeight="UltraBlack" />
-            <TextBox Margin="50,0,50,0" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}" 
-                     FontSize="13" FontWeight="Bold"/>
-            <Label Margin="0,5" Content="种子" HorizontalAlignment="Center" FontWeight="UltraBlack" />
-            <TextBox Margin="200,0,200,0" Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}"
-                     FontSize="13" FontWeight="Bold"/>
-            <Separator Margin="0,25,0,0" />
-            
+            <Separator Height="0" Margin="0,20,0,0" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Label Content="当前种子:" FontWeight="Medium"/>
-                <Label Content="{Binding LastSeedText}" FontWeight="Black" Foreground="YellowGreen" />
+                <Label Width="120" HorizontalContentAlignment="Right" HorizontalAlignment="Center"
+                       Content="艾尔登法环exe路径：" FontWeight="UltraBlack">
+                </Label>
+                <TextBox Width="420" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"
+                         FontSize="13" FontWeight="Bold" />
             </StackPanel>
-            
+            <Separator Height="0" Margin="0,20,0,0" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Button Width="150" Height="40" Content="启动正常游戏!" Command="{Binding LaunchEldenRingNormal}" FontWeight="Bold"/>
-                <Separator Margin="100,0,0,0" />
+                <Label Width="120" HorizontalContentAlignment="Right" Content="输入种子：" HorizontalAlignment="Center"
+                       FontWeight="UltraBlack" />
+                <TextBox Margin="0, 0, 220, 0" Width="200" Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}"
+                         FontSize="13" FontWeight="Bold" />
+            </StackPanel>
+            <Separator Height="0" Margin="0,20,0,0" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Label Width="120" HorizontalContentAlignment="Right" Content="规则：" HorizontalAlignment="Center"
+                       FontWeight="UltraBlack" />
+                <StackPanel Orientation="Vertical">
+                    <CheckBox Margin="0,5,0,0" Width="420" Content="随机初始职业" VerticalAlignment="Center"
+                              IsChecked="{Binding RandomStartupClasses, Mode=TwoWay}"
+                              FontSize="13" FontWeight="Medium" />
+                    <CheckBox Width="420" Content="随机武器" VerticalAlignment="Center"
+                              IsChecked="{Binding RandomWeapons, Mode=TwoWay}"
+                              FontSize="13" FontWeight="Medium" />
+                    <CheckBox Width="420" Content="获取灵马后开放赐福" VerticalAlignment="Center"
+                              IsChecked="{Binding OpenGraces, Mode=TwoWay}"
+                              FontSize="13" FontWeight="Medium" />
+                    <CheckBox Width="420" Content="降低非失色升级材料需求" VerticalAlignment="Center"
+                              IsChecked="{Binding ReduceUpgradeMat, Mode=TwoWay}"
+                              FontSize="13" FontWeight="Medium" />
+                </StackPanel>
+            </StackPanel>
+
+            <Separator Margin="0,10,0,10" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Label Width="120" HorizontalContentAlignment="Right" Content="当前种子:" FontWeight="Medium" />
+                <Label Width="420" Content="{Binding LastSeedText}" FontWeight="Black" Foreground="YellowGreen" />
+            </StackPanel>
+
+            <Separator Height="0" Margin="0,10,0,0" />
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Width="150" Height="40" Content="启动正常游戏!" Command="{Binding LaunchEldenRingNormal}"
+                        FontWeight="Bold" />
+                <Separator Margin="50,0,0,0" />
                 <Grid>
                     <Button Width="150" Height="40" Content="取消" Command="{Binding Cancel}"
                             Visibility="{Binding InProgress, Converter={StaticResource BoolToVisibilityConverter}}"
-                            FontWeight="Bold"/>
-                    <Button Width="150" Height="40" Content="启动随机mod!" Command="{Binding RandomizeBingo}" 
+                            FontWeight="Bold" />
+                    <Button Width="150" Height="40" Content="启动随机mod!" Command="{Binding RandomizeBingo}"
                             Visibility="{Binding InProgress, Converter={StaticResource InverseBoolToVisibilityConverter}}"
-                            FontWeight="Bold"/>
+                            FontWeight="Bold" />
+                </Grid>
+                <Separator Margin="50,0,0,0" />
+                <Grid>
+                    <Button Width="150" Height="40" Content="取消" Command="{Binding Cancel}"
+                            Visibility="{Binding Packaging, Converter={StaticResource BoolToVisibilityConverter}}"
+                            FontWeight="Bold" />
+                    <Button Width="150" Height="40" Content="Mod目录打包" Command="{Binding PackageFiles}"
+                            Visibility="{Binding Packaging, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                            FontWeight="Bold" />
                 </Grid>
             </StackPanel>
-            
+
         </StackPanel>
         <ListBox Grid.Row="1" Name="LogListBox" ItemsSource="{Binding MessageDisplayView}" Background="Gray">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding}" FontWeight="Bold" Foreground="LightGray"/>
+                        <TextBlock Text="{Binding}" FontWeight="Bold" Foreground="LightGray" />
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

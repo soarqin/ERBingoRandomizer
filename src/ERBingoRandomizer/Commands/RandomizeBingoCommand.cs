@@ -34,7 +34,14 @@ public class RandomizeBingoCommand : AsyncCommandBase {
             // _mwViewModel.Path is not null, and is a valid path to eldenring.exe, because of the conditions in CanExecute.
             try
             {
-                BingoRandomizer randomizer = await BingoRandomizer.BuildRandomizerAsync(_mwViewModel.Path!, _mwViewModel.Seed, _mwViewModel.CancellationToken);
+                var rule = new RandomizeRule {
+                    Seed = _mwViewModel.Seed,
+                    RandomStartupClasses = _mwViewModel.RandomStartupClasses,
+                    RandomWeapons = _mwViewModel.RandomWeapons,
+                    OpenGraces = _mwViewModel.OpenGraces,
+                    ReduceUpgradeMat = _mwViewModel.ReduceUpgradeMat
+                };
+                BingoRandomizer randomizer = await BingoRandomizer.BuildRandomizerAsync(_mwViewModel.Path!, rule, _mwViewModel.CancellationToken);
                 await Task.Run(() => randomizer.RandomizeRegulation());
                 _mwViewModel.LastSeed = randomizer.GetSeedInfo();
                 _mwViewModel.FilesReady = true;

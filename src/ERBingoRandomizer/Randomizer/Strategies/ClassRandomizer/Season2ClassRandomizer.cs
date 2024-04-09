@@ -1,7 +1,6 @@
 ﻿using ERBingoRandomizer.Params;
 using ERBingoRandomizer.Utility;
 using FSParam;
-using SoulsFormats;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -52,6 +52,10 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
         get => _seed;
         set => SetField(ref _seed, value);
     }
+    public bool RandomStartupClasses { get; set; } = true;
+    public bool RandomWeapons { get; set; } = true;
+    public bool OpenGraces { get; set; } = true;
+    public bool ReduceUpgradeMat { get; set; } = true;
     private string _path = Util.TryGetGameInstallLocation("\\steamapps\\common\\ELDEN RING\\Game\\eldenring.exe") ?? string.Empty;
     public string Path {
         get => _path;

@@ -1,7 +1,6 @@
 ﻿using ERBingoRandomizer.Utility;
 using FSParam;
 using System;
-using ERBingoRandomizer.Params;
 
 namespace ERBingoRandomizer.Randomizer.Strategies.CharaInitParam;
 

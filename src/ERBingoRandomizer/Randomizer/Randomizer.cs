@@ -1,5 +1,4 @@
-﻿using ERBingoRandomizer.FileHandler;
-using ERBingoRandomizer.Params;
+﻿using ERBingoRandomizer.Params;
 using ERBingoRandomizer.Randomizer.Strategies;
 using ERBingoRandomizer.Randomizer.Strategies.CharaInitParam;
 using ERBingoRandomizer.Utility;
@@ -8,11 +7,7 @@ using SoulsFormats;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using static ERBingoRandomizer.Params.EquipParamWeapon;
@@ -20,34 +15,40 @@ using static ERBingoRandomizer.Params.EquipParamWeapon;
 
 namespace ERBingoRandomizer.Randomizer;
 
+public struct RandomizeRule {
+    public string Seed;
+    public bool RandomStartupClasses;
+    public bool RandomWeapons;
+    public bool OpenGraces;
+    public bool ReduceUpgradeMat;
+}
+
 public partial class BingoRandomizer {
     private RandoResource _resources;
     // Strategies
     private readonly IBingoClassStrategy _classRandomizer;
-
-    // TODO: Switch this out based on season, or use granular feature object for individual features.
-    private static bool Season3 = true;
-
+    private readonly bool _randomStartupClasses;
+    private readonly bool _randomWeapons;
+    private readonly bool _openGraces;
+    private readonly bool _reduceUpgradeMat;
+    
     //static async method that behaves like a constructor    
-    public static async Task<BingoRandomizer> BuildRandomizerAsync(string path, string seed,
+    public static async Task<BingoRandomizer> BuildRandomizerAsync(string path, RandomizeRule rule,
         CancellationToken cancellationToken) {
-        BingoRandomizer rando = new(path, seed, cancellationToken);
+        BingoRandomizer rando = new(path, rule, cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-        await Task.Run(() => rando.init());
+        await Task.Run(() => rando.init(), cancellationToken);
         return rando;
     }
     // Cancellation Token
     private readonly CancellationToken _cancellationToken;
-    private BingoRandomizer(string path, string seed, CancellationToken cancellationToken) {
-        _resources = new RandoResource(path, seed, cancellationToken);
-        if (Season3)
-        {
-            _classRandomizer = new Season3ClassRandomizer(new Season2LevelRandomizer(_resources.Random), _resources);
-        }
-        else
-        {
-            _classRandomizer = new Season2ClassRandomizer(new Season2LevelRandomizer(_resources.Random), _resources);
-        }
+    private BingoRandomizer(string path, RandomizeRule rule, CancellationToken cancellationToken) {
+        _resources = new RandoResource(path, rule.Seed, cancellationToken);
+        _randomStartupClasses = rule.RandomStartupClasses;
+        _randomWeapons = rule.RandomWeapons;
+        _openGraces = rule.OpenGraces;
+        _reduceUpgradeMat = rule.ReduceUpgradeMat;
+        _classRandomizer = new Season3ClassRandomizer(new Season2LevelRandomizer(_resources.Random), _resources);
         _cancellationToken = cancellationToken;
     }
 
@@ -57,22 +58,28 @@ public partial class BingoRandomizer {
 
     public Task RandomizeRegulation() {
         //calculateLevels();
-        _classRandomizer.RandomizeCharaInitParam();
-        _cancellationToken.ThrowIfCancellationRequested();
-        randomizeItemLotParams();
-        _cancellationToken.ThrowIfCancellationRequested();
-        randomizeShopLineupParam();
-        _cancellationToken.ThrowIfCancellationRequested();
-        randomizeShopLineupParamMagic();
+        if (_randomStartupClasses) {
+            _classRandomizer.RandomizeCharaInitParam();
+            _cancellationToken.ThrowIfCancellationRequested();
+        }
+        if (_randomWeapons) {
+            randomizeItemLotParams();
+            _cancellationToken.ThrowIfCancellationRequested();
+            randomizeShopLineupParam();
+            _cancellationToken.ThrowIfCancellationRequested();
+            randomizeShopLineupParamMagic();
+        }
         _cancellationToken.ThrowIfCancellationRequested();
         patchAtkParam();
         _cancellationToken.ThrowIfCancellationRequested();
-        changeUpgradeMaterialType();
-        _cancellationToken.ThrowIfCancellationRequested();
-        if (Season3) {
-            unlockSeason3Graces();
+        if (_reduceUpgradeMat) {
+            changeUpgradeMaterialType();
+            _cancellationToken.ThrowIfCancellationRequested();
         }
-        _cancellationToken.ThrowIfCancellationRequested();
+        if (_openGraces) {
+            unlockSeason3Graces();
+            _cancellationToken.ThrowIfCancellationRequested();
+        }
         writeFiles();
         Logger.WriteLog(_resources.Seed);
         return Task.CompletedTask;

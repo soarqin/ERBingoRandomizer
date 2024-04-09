@@ -1,5 +1,4 @@
-﻿using ERBingoRandomizer.Utility;
-using ERBingoRandomizer.ViewModels;
+﻿using ERBingoRandomizer.ViewModels;
 using System.ComponentModel;
 
 namespace ERBingoRandomizer.Commands;
