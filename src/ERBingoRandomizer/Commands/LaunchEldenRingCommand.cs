@@ -20,12 +20,13 @@ public class LaunchEldenRingCommand : CommandBase {
         }
         _mwViewModel.ListBoxDisplay.Clear();
         _mwViewModel.DisplayMessage("正在通过ModEngine 2运行艾尔登法环");
-        LaunchGame();
+        LaunchGame(_mwViewModel.Path);
     }
-    private static void LaunchGame() {
+    private static void LaunchGame(string path) {
         Process me2 = new() {
             StartInfo = new ProcessStartInfo {
-                FileName = "launchmod_bingo.bat",
+                FileName = "modengine2_launcher.exe",
+                Arguments = "-t er -c config_bingo.toml -p \"" + path + "\"",
                 WorkingDirectory = Const.ME2Path,
                 UseShellExecute = true,
                 CreateNoWindow = true,
@@ -67,12 +68,13 @@ public class LaunchEldenRingNormalCommand : CommandBase {
         }
         _mwViewModel.ListBoxDisplay.Clear();
         _mwViewModel.DisplayMessage("正在通过ModEngine 2运行艾尔登法环");
-        LaunchGame();
+        LaunchGame(_mwViewModel.Path);
     }
-    private static void LaunchGame() {
+    private static void LaunchGame(string path) {
         Process me2 = new() {
             StartInfo = new ProcessStartInfo {
-                FileName = "launchmod_normal.bat",
+                FileName = "modengine2_launcher.exe",
+                Arguments = "-t er -c config_normal.toml -p \"" + path + "\"",
                 WorkingDirectory = Const.ME2Path,
                 UseShellExecute = true,
                 CreateNoWindow = true,
