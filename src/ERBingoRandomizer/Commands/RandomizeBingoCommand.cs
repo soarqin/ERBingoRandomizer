@@ -60,7 +60,8 @@ public class RandomizeBingoCommand : AsyncCommandBase {
         _mwViewModel.DisplayMessage("正在用MOD引擎启动艾尔登法环");
         Process me2 = new() {
             StartInfo = new ProcessStartInfo {
-                FileName = "launchmod_bingo.bat",
+                FileName = "modengine2_launcher.exe",
+                Arguments = "-t er -c config_bingo.toml -p \"" + _mwViewModel.Path + "\"",
                 WorkingDirectory = Const.ME2Path,
                 UseShellExecute = true,
                 CreateNoWindow = true,
