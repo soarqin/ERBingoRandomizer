@@ -117,6 +117,10 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
         get => _lastSeed;
         set {
             Seed = value?.Seed ?? string.Empty;
+            RandomStartupClasses = value?.RandomStartupClasses ?? true;
+            RandomWeapons = value?.RandomWeapons ?? true;
+            OpenGraces = value?.OpenGraces ?? true;
+            ReduceUpgradeMat = value?.ReduceUpgradeMat ?? true;
             if (SetField(ref _lastSeed, value)) {
                 OnPropertyChanged(nameof(LastSeedText));
             }
