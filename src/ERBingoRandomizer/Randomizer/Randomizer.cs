@@ -98,8 +98,8 @@ public partial class BingoRandomizer {
         }
     }
 
-    public SeedInfo GetSeedInfo() {
-        return new SeedInfo(_resources.Seed, Util.GetShaRegulation256Hash());
+    public string GetSeed() {
+        return _resources.Seed;
     }
     private void randomizeItemLotParams() {
         OrderedDictionary categoryDictEnemy = new();

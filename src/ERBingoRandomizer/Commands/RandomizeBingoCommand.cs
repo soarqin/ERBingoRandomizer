@@ -4,7 +4,9 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
+using ERBingoRandomizer.Utility;
 
 namespace ERBingoRandomizer.Commands;
 
@@ -27,7 +29,9 @@ public class RandomizeBingoCommand : AsyncCommandBase {
         }
         _mwViewModel.ListBoxDisplay.Clear();
         _mwViewModel.ListBoxDisplay.Clear();
-        if (_mwViewModel.LastSeed?.Seed != _mwViewModel.Seed) {
+        var lastSeed = _mwViewModel.LastSeed;
+        if (lastSeed == null || lastSeed.Seed != _mwViewModel.Seed || lastSeed.RandomStartupClasses != _mwViewModel.RandomStartupClasses || lastSeed.RandomWeapons != _mwViewModel.RandomWeapons ||
+            lastSeed.OpenGraces != _mwViewModel.OpenGraces || lastSeed.ReduceUpgradeMat != _mwViewModel.ReduceUpgradeMat) {
             _mwViewModel.DisplayMessage("正在随机艾尔登法环规则文件");
             _mwViewModel.InProgress = true;
             _mwViewModel.RandoButtonText = "Cancel";
@@ -43,9 +47,11 @@ public class RandomizeBingoCommand : AsyncCommandBase {
                 };
                 BingoRandomizer randomizer = await BingoRandomizer.BuildRandomizerAsync(_mwViewModel.Path!, rule, _mwViewModel.CancellationToken);
                 await Task.Run(() => randomizer.RandomizeRegulation());
-                _mwViewModel.LastSeed = randomizer.GetSeedInfo();
+                _mwViewModel.LastSeed = new SeedInfo(randomizer.GetSeed(), Util.GetShaRegulation256Hash(), _mwViewModel.RandomStartupClasses, _mwViewModel.RandomWeapons, _mwViewModel.OpenGraces, _mwViewModel.ReduceUpgradeMat);
+                var seedJson = JsonSerializer.Serialize(_mwViewModel.LastSeed);
+                await File.WriteAllTextAsync(Config.LastSeedPath, seedJson);
                 _mwViewModel.FilesReady = true;
-                _mwViewModel.DisplayMessage($"随机完成。种子：{randomizer.GetSeedInfo().Seed}");
+                _mwViewModel.DisplayMessage($"随机完成。种子：{randomizer.GetSeed()}");
             }
             catch (OperationCanceledException)
             {
@@ -53,7 +59,7 @@ public class RandomizeBingoCommand : AsyncCommandBase {
             }
             finally
             {
-                _mwViewModel.RandoButtonText = "Randomize!";
+                _mwViewModel.RandoButtonText = "Randomize";
                 _mwViewModel.InProgress = false;
             }
         }
