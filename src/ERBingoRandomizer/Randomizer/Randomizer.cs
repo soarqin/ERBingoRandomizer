@@ -21,6 +21,7 @@ public struct RandomizeRule {
     public bool RandomWeapons;
     public bool OpenGraces;
     public bool ReduceUpgradeMat;
+    public int ReduceUpgradeMatType;
 }
 
 public partial class BingoRandomizer {
@@ -30,7 +31,7 @@ public partial class BingoRandomizer {
     private readonly bool _randomStartupClasses;
     private readonly bool _randomWeapons;
     private readonly bool _openGraces;
-    private readonly bool _reduceUpgradeMat;
+    private readonly int _reduceUpgradeMatType;
     
     //static async method that behaves like a constructor    
     public static async Task<BingoRandomizer> BuildRandomizerAsync(string path, RandomizeRule rule,
@@ -47,7 +48,7 @@ public partial class BingoRandomizer {
         _randomStartupClasses = rule.RandomStartupClasses;
         _randomWeapons = rule.RandomWeapons;
         _openGraces = rule.OpenGraces;
-        _reduceUpgradeMat = rule.ReduceUpgradeMat;
+        _reduceUpgradeMatType = rule.ReduceUpgradeMat ? rule.ReduceUpgradeMatType : -1;
         _classRandomizer = new Season3ClassRandomizer(new Season2LevelRandomizer(_resources.Random), _resources);
         _cancellationToken = cancellationToken;
     }
@@ -72,10 +73,9 @@ public partial class BingoRandomizer {
         _cancellationToken.ThrowIfCancellationRequested();
         patchAtkParam();
         _cancellationToken.ThrowIfCancellationRequested();
-        if (_reduceUpgradeMat) {
-            changeUpgradeMaterialType();
-            _cancellationToken.ThrowIfCancellationRequested();
-        }
+        if (_reduceUpgradeMatType >= 0)
+            changeUpgradeMaterialType(_reduceUpgradeMatType);
+        _cancellationToken.ThrowIfCancellationRequested();
         if (_openGraces) {
             unlockSeason3Graces();
             _cancellationToken.ThrowIfCancellationRequested();
@@ -85,7 +85,7 @@ public partial class BingoRandomizer {
         return Task.CompletedTask;
     }
 
-    private void changeUpgradeMaterialType() {
+    private void changeUpgradeMaterialType(int type) {
         foreach (Param.Row row in _resources.EquipMtrlSetParam.Rows) {
             EquipMtrlSetParam mtrl = new EquipMtrlSetParam(row);
             
@@ -93,7 +93,14 @@ public partial class BingoRandomizer {
             int cat = mtrl.materialCate01;
             int num = mtrl.itemNum01;
             if (cat == 4 && id >= 10100 && id < 10110 && num > 1) {
-                mtrl.itemNum01 = 1;
+                if (type == 0)
+                {
+                    mtrl.itemNum01 = 1;
+                }
+                else
+                {
+                    mtrl.itemNum01 = (sbyte)(num >> 1);
+                }
             }
         }
     }

@@ -54,9 +54,41 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
     }
     public bool RandomStartupClasses { get; set; } = true;
     public bool RandomWeapons { get; set; } = true;
-    public bool OpenGraces { get; set; } = true;
-    public bool ReduceUpgradeMat { get; set; } = true;
-    private string _path = Util.TryGetGameInstallLocation("\\steamapps\\common\\ELDEN RING\\Game\\eldenring.exe") ?? string.Empty;
+    public bool OpenGraces { get; set; } = false;
+
+    private bool _reduceUpgradeMat = false;
+    public bool ReduceUpgradeMat
+    {
+        get => _reduceUpgradeMat;
+        set
+        {
+            SetField(ref _reduceUpgradeMat, value);
+            OnPropertyChanged();
+        }
+    }
+
+    public int ReduceUpgradeMatType = 1;
+    public bool IsReduceUpgradeMatType0
+    {
+        get => ReduceUpgradeMatType == 0;
+        set
+        {
+            if (!value) return;
+            ReduceUpgradeMatType = 0;
+            OnPropertyChanged(nameof(ReduceUpgradeMatType));
+        }
+    }
+    public bool IsReduceUpgradeMatType1
+    {
+        get => ReduceUpgradeMatType == 1;
+        set
+        {
+            if (!value) return;
+            ReduceUpgradeMatType = 1;
+            OnPropertyChanged(nameof(ReduceUpgradeMatType));
+        }
+    }
+    private string _path = Util.TryGetGameInstallLocation(@"\steamapps\common\ELDEN RING\Game\eldenring.exe") ?? string.Empty;
     public string Path {
         get => _path;
         set => SetField(ref _path, value);
@@ -119,8 +151,9 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
             Seed = value?.Seed ?? string.Empty;
             RandomStartupClasses = value?.RandomStartupClasses ?? true;
             RandomWeapons = value?.RandomWeapons ?? true;
-            OpenGraces = value?.OpenGraces ?? true;
-            ReduceUpgradeMat = value?.ReduceUpgradeMat ?? true;
+            OpenGraces = value?.OpenGraces ?? false;
+            ReduceUpgradeMat = value?.ReduceUpgradeMat ?? false;
+            ReduceUpgradeMatType = value?.ReduceUpgradeMatType ?? 1;
             if (SetField(ref _lastSeed, value)) {
                 OnPropertyChanged(nameof(LastSeedText));
             }

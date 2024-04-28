@@ -43,11 +43,12 @@ public class RandomizeBingoCommand : AsyncCommandBase {
                     RandomStartupClasses = _mwViewModel.RandomStartupClasses,
                     RandomWeapons = _mwViewModel.RandomWeapons,
                     OpenGraces = _mwViewModel.OpenGraces,
-                    ReduceUpgradeMat = _mwViewModel.ReduceUpgradeMat
+                    ReduceUpgradeMat = _mwViewModel.ReduceUpgradeMat,
+                    ReduceUpgradeMatType = _mwViewModel.ReduceUpgradeMatType,
                 };
                 BingoRandomizer randomizer = await BingoRandomizer.BuildRandomizerAsync(_mwViewModel.Path!, rule, _mwViewModel.CancellationToken);
                 await Task.Run(() => randomizer.RandomizeRegulation());
-                _mwViewModel.LastSeed = new SeedInfo(randomizer.GetSeed(), Util.GetShaRegulation256Hash(), _mwViewModel.RandomStartupClasses, _mwViewModel.RandomWeapons, _mwViewModel.OpenGraces, _mwViewModel.ReduceUpgradeMat);
+                _mwViewModel.LastSeed = new SeedInfo(randomizer.GetSeed(), Util.GetShaRegulation256Hash(), _mwViewModel.RandomStartupClasses, _mwViewModel.RandomWeapons, _mwViewModel.OpenGraces, _mwViewModel.ReduceUpgradeMat, _mwViewModel.ReduceUpgradeMatType);
                 var seedJson = JsonSerializer.Serialize(_mwViewModel.LastSeed);
                 await File.WriteAllTextAsync(Config.LastSeedPath, seedJson);
                 _mwViewModel.FilesReady = true;
