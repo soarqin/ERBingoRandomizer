@@ -11,7 +11,7 @@
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="285" />
+            <RowDefinition Height="315" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <StackPanel>
@@ -21,14 +21,14 @@
                        Content="艾尔登法环exe路径：" FontWeight="UltraBlack">
                 </Label>
                 <TextBox Width="420" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"
-                         FontSize="13" FontWeight="Bold" />
+                         VerticalContentAlignment="Center" FontSize="13" FontWeight="Bold" />
             </StackPanel>
             <Separator Height="0" Margin="0,20,0,0" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Label Width="120" HorizontalContentAlignment="Right" Content="输入种子：" HorizontalAlignment="Center"
                        FontWeight="UltraBlack" />
                 <TextBox Margin="0, 0, 220, 0" Width="200" Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}"
-                         FontSize="13" FontWeight="Bold" />
+                         VerticalContentAlignment="Center" FontSize="13" FontWeight="Bold" />
             </StackPanel>
             <Separator Height="0" Margin="0,20,0,0" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -45,8 +45,16 @@
                               IsChecked="{Binding OpenGraces, Mode=TwoWay}"
                               FontSize="13" FontWeight="Medium" />
                     <CheckBox Width="420" Content="降低非失色升级材料需求" VerticalAlignment="Center"
-                              IsChecked="{Binding ReduceUpgradeMat, Mode=TwoWay}"
+                              IsChecked ="{Binding ReduceUpgradeMat, Mode=TwoWay}"
                               FontSize="13" FontWeight="Medium" />
+                    <RadioButton Margin="50,0,0,0" Width="420" Content="1/1/1" VerticalAlignment="Center" GroupName="ReduceUpgradeMatGroup"
+                                 IsChecked="{Binding IsReduceUpgradeMatType0, Mode=TwoWay}"
+                                 IsEnabled="{Binding ReduceUpgradeMat}"
+                                 FontSize="13" FontWeight="Medium" />
+                    <RadioButton Margin="50,0,0,0" Width="420" Content="1/2/3" VerticalAlignment="Center" GroupName="ReduceUpgradeMatGroup"
+                                 IsChecked="{Binding IsReduceUpgradeMatType1, Mode=TwoWay}"
+                                 IsEnabled="{Binding ReduceUpgradeMat}"
+                                 FontSize="13" FontWeight="Medium" />
                 </StackPanel>
             </StackPanel>
 
