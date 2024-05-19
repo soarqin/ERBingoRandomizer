@@ -3,12 +3,12 @@
 public class SeedInfo {
     public SeedInfo(string seed, string sha256Hash, bool randomStartupClasses = true, bool randomWeapons = true, bool openGraces = false, bool reduceUpgradeMat = false, int reduceUpgradeMatType = 1) {
         Seed = seed;
+        Sha256Hash = sha256Hash;
         RandomStartupClasses = randomStartupClasses;
         RandomWeapons = randomWeapons;
         OpenGraces = openGraces;
         ReduceUpgradeMat = reduceUpgradeMat;
         ReduceUpgradeMatType = reduceUpgradeMatType;
-        Sha256Hash = sha256Hash;
     }
     public string Seed { get; }
     public string Sha256Hash { get; }

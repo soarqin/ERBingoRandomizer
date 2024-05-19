@@ -22,6 +22,7 @@ public struct RandomizeRule {
     public bool OpenGraces;
     public bool ReduceUpgradeMat;
     public int ReduceUpgradeMatType;
+    public KeyValuePair<int, int>[] StartupItems;
 }
 
 public partial class BingoRandomizer {
@@ -32,6 +33,7 @@ public partial class BingoRandomizer {
     private readonly bool _randomWeapons;
     private readonly bool _openGraces;
     private readonly int _reduceUpgradeMatType;
+    private readonly KeyValuePair<int, int>[] _startupItems;
     
     //static async method that behaves like a constructor    
     public static async Task<BingoRandomizer> BuildRandomizerAsync(string path, RandomizeRule rule,
@@ -49,6 +51,7 @@ public partial class BingoRandomizer {
         _randomWeapons = rule.RandomWeapons;
         _openGraces = rule.OpenGraces;
         _reduceUpgradeMatType = rule.ReduceUpgradeMat ? rule.ReduceUpgradeMatType : -1;
+        _startupItems = rule.StartupItems;
         _classRandomizer = new Season3ClassRandomizer(new Season2LevelRandomizer(_resources.Random), _resources);
         _cancellationToken = cancellationToken;
     }
@@ -80,6 +83,8 @@ public partial class BingoRandomizer {
             unlockSeason3Graces();
             _cancellationToken.ThrowIfCancellationRequested();
         }
+        _cancellationToken.ThrowIfCancellationRequested();
+        addStartupItems();
         writeFiles();
         Logger.WriteLog(_resources.Seed);
         return Task.CompletedTask;
@@ -108,6 +113,55 @@ public partial class BingoRandomizer {
     public string GetSeed() {
         return _resources.Seed;
     }
+
+    private void addItemWithLotID(int id, int itemId, int itemCat, int itemCount)
+    {
+        Param.Row row = new Param.Row(id, "", _resources.ItemLotParamMap);
+        row.Cells.First(c => c.Def.InternalName == "lotItemId01").SetValue(row, itemId);
+        row.Cells.First(c => c.Def.InternalName == "lotItemCategory01").SetValue(row, itemCat);
+        row.Cells.First(c => c.Def.InternalName == "lotItemBasePoint01").SetValue(row, (ushort)100);
+        row.Cells.First(c => c.Def.InternalName == "lotItemNum01").SetValue(row, (byte)itemCount);
+        _resources.ItemLotParamMap.AddRow(row);
+    }
+
+    private void addStartupItems()
+    {
+
+        int newEventId = 279551112;  // Arbitrary number
+        EMEVD common = _resources.CommonEmevd;
+        if (common == null) {
+            throw new InvalidOperationException($"Missing emevd {Const.CommonEventPath}");
+        }
+        List<EMEVD.Instruction> newInstrs = new()
+        {
+            // EndIfEventFlag(End, ON, TargetEventFlagType.EventFlag, 60000)
+            new EMEVD.Instruction(1003, 2, new List<object> { (byte)0, (byte)1, (byte)0, (uint)60000 }),
+            // IfEventFlag(MAIN, ON, TargetEventFlagType.EventFlag, 60000)
+            new EMEVD.Instruction(3, 0, new List<object> { (sbyte)0, (byte)1, (byte)0, (uint)60000 }),
+        };
+        for (int i = 0; i < _startupItems.Length; i++)
+        {
+            var (id, cat) = _startupItems[i];
+            addItemWithLotID(70000 + i, id, cat, 1);
+            if (i % 10 == 0)
+            {
+                // AwardItemLot(70000 + i)
+                newInstrs.Add(new EMEVD.Instruction(2003, 4, new List<object> { 70000 + i }));
+            }
+        }
+        // EndEvent()
+        newInstrs.Add(new EMEVD.Instruction(1000, 4, new List<object> { (byte)0 }));
+        EMEVD.Event newEvent = new EMEVD.Event(newEventId, EMEVD.Event.RestBehaviorType.Default);
+        newEvent.Instructions = newInstrs;
+        common.Events.Add(newEvent);
+        EMEVD.Event? constrEvent = common.Events.Find(e => e.ID == 0);
+        if (constrEvent == null) {
+            throw new InvalidOperationException($"{Const.CommonEventPath} missing of required event: 0");
+        }
+        // Initialize new event
+        constrEvent.Instructions.Add(new EMEVD.Instruction(2000, 0, new List<object> { 0, newEventId, 0 }));
+    }
+
     private void randomizeItemLotParams() {
         OrderedDictionary categoryDictEnemy = new();
         OrderedDictionary categoryDictMap = new();

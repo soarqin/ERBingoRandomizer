@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:viewModels="clr-namespace:ERBingoRandomizer.ViewModels"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d" ResizeMode="NoResize"
         Title="Bingo Randomizer" Height="450" Width="600" Background="DimGray">
     <Window.DataContext>
@@ -11,7 +12,9 @@
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="315" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <StackPanel>
@@ -30,33 +33,620 @@
                 <TextBox Margin="0, 0, 220, 0" Width="200" Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}"
                          VerticalContentAlignment="Center" FontSize="13" FontWeight="Bold" />
             </StackPanel>
-            <Separator Height="0" Margin="0,20,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Row="1">
+            <Separator Margin="0,10,0,10" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Label Width="120" HorizontalContentAlignment="Right" Content="规则：" HorizontalAlignment="Center"
                        FontWeight="UltraBlack" />
                 <StackPanel Orientation="Vertical">
-                    <CheckBox Margin="0,5,0,0" Width="420" Content="随机初始职业" VerticalAlignment="Center"
+                    <CheckBox Margin="0,5,0,0" Width="280" Content="随机初始职业" VerticalAlignment="Center"
                               IsChecked="{Binding RandomStartupClasses, Mode=TwoWay}"
                               FontSize="13" FontWeight="Medium" />
-                    <CheckBox Width="420" Content="随机武器" VerticalAlignment="Center"
+                    <CheckBox Width="280" Content="随机武器" VerticalAlignment="Center"
                               IsChecked="{Binding RandomWeapons, Mode=TwoWay}"
                               FontSize="13" FontWeight="Medium" />
-                    <CheckBox Width="420" Content="获取灵马后开放赐福" VerticalAlignment="Center"
+                    <CheckBox Width="280" Content="获取灵马后开放赐福" VerticalAlignment="Center"
                               IsChecked="{Binding OpenGraces, Mode=TwoWay}"
                               FontSize="13" FontWeight="Medium" />
-                    <CheckBox Width="420" Content="降低非失色升级材料需求" VerticalAlignment="Center"
-                              IsChecked ="{Binding ReduceUpgradeMat, Mode=TwoWay}"
+                    <CheckBox Width="280" Content="降低非失色升级材料需求" VerticalAlignment="Center"
+                              IsChecked="{Binding ReduceUpgradeMat, Mode=TwoWay}"
                               FontSize="13" FontWeight="Medium" />
-                    <RadioButton Margin="50,0,0,0" Width="420" Content="1/1/1" VerticalAlignment="Center" GroupName="ReduceUpgradeMatGroup"
+                    <RadioButton Margin="50,0,0,0" Width="280" Content="1/1/1" VerticalAlignment="Center" GroupName="ReduceUpgradeMatGroup"
                                  IsChecked="{Binding IsReduceUpgradeMatType0, Mode=TwoWay}"
                                  IsEnabled="{Binding ReduceUpgradeMat}"
                                  FontSize="13" FontWeight="Medium" />
-                    <RadioButton Margin="50,0,0,0" Width="420" Content="1/2/3" VerticalAlignment="Center" GroupName="ReduceUpgradeMatGroup"
+                    <RadioButton Margin="50,0,0,0" Width="280" Content="1/2/3" VerticalAlignment="Center" GroupName="ReduceUpgradeMatGroup"
                                  IsChecked="{Binding IsReduceUpgradeMatType1, Mode=TwoWay}"
                                  IsEnabled="{Binding ReduceUpgradeMat}"
                                  FontSize="13" FontWeight="Medium" />
                 </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <Label Content="开局获取道具" />
+                    <ListBox Name="StartupItems" ItemsSource="{Binding StartupItems}" Width="120" Height="55" SelectedIndex="{Binding StartupItemSelectedIndex, Mode=TwoWay}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Name="AddStartupItem" Click="AddStartupItem_Click" Width="20" Height="20" Content="+" ContextMenuService.IsEnabled="false">
+                            <Button.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="武器">
+                                        <MenuItem Header="短剑">
+                                            <MenuItem Header="匕首" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1000000" />
+                                            <MenuItem Header="格挡匕首" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1020000" />
+                                            <MenuItem Header="慈悲短剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1030000" />
+                                            <MenuItem Header="单刃小刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1090000" />
+                                            <MenuItem Header="染血短刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1140000" />
+                                            <MenuItem Header="黄铜短刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1150000" />
+                                            <MenuItem Header="胁差" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1100000" />
+                                            <MenuItem Header="庆典小镰刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1060000" />
+                                            <MenuItem Header="象牙小镰刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1130000" />
+                                            <MenuItem Header="结晶小刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1050000" />
+                                            <MenuItem Header="蝎尾针" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1080000" />
+                                            <MenuItem Header="五指剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1110000" />
+                                            <MenuItem Header="辉石克力士" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1070000" />
+                                            <MenuItem Header="逆刺" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1040000" />
+                                            <MenuItem Header="使命短刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1160000" />
+                                            <MenuItem Header="黑刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1010000" />
+                                        </MenuItem>
+                                        <MenuItem Header="直剑">
+                                            <MenuItem Header="短剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2010000" />
+                                            <MenuItem Header="长剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2000000" />
+                                            <MenuItem Header="阔剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2020000" />
+                                            <MenuItem Header="老旧直剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2050000" />
+                                            <MenuItem Header="君王军直剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2040000" />
+                                            <MenuItem Header="权贵细身剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2230000" />
+                                            <MenuItem Header="手杖剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2210000" />
+                                            <MenuItem Header="战鹰爪形剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2240000" />
+                                            <MenuItem Header="拉兹利辉石剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2250000" />
+                                            <MenuItem Header="卡利亚骑士剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2180000" />
+                                            <MenuItem Header="结晶剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2150000" />
+                                            <MenuItem Header="腐败结晶剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2260000" />
+                                            <MenuItem Header="米凯拉骑士剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2200000" />
+                                            <MenuItem Header="仪式直剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2060000" />
+                                            <MenuItem Header="黄金墓碑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2070000" />
+                                            <MenuItem Header="托莉娜剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2190000" />
+                                            <MenuItem Header="欧赫宝剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2220000" />
+                                            <MenuItem Header="秘文剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2110000" />
+                                            <MenuItem Header="夜与火之剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2140000" />
+                                        </MenuItem>
+                                        <MenuItem Header="大剑">
+                                            <MenuItem Header="混种大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3000000" />
+                                            <MenuItem Header="大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3180000" />
+                                            <MenuItem Header="铁制大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3020000" />
+                                            <MenuItem Header="君王军大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3030000" />
+                                            <MenuItem Header="骑士大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3040000" />
+                                            <MenuItem Header="失乡骑士大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3080000" />
+                                            <MenuItem Header="分岔大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3010000" />
+                                            <MenuItem Header="焰形大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3050000" />
+                                            <MenuItem Header="石像鬼大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3190000" />
+                                            <MenuItem Header="石像鬼黑剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3210000" />
+                                            <MenuItem Header="紧密孪生剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2090000" />
+                                            <MenuItem Header="灭洛斯剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3160000" />
+                                            <MenuItem Header="玛雷家行刑剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3150000" />
+                                            <MenuItem Header="奥陶琵斯大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3060000" />
+                                            <MenuItem Header="白王剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3070000" />
+                                            <MenuItem Header="死亡钩棒" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3200000" />
+                                            <MenuItem Header="赫芬尖塔剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3130000" />
+                                            <MenuItem Header="亵渎圣剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3140000" />
+                                            <MenuItem Header="黄金律法大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3170000" />
+                                            <MenuItem Header="暗月大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3090000" />
+                                            <MenuItem Header="神躯化剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3100000" />
+                                        </MenuItem>
+                                        <MenuItem Header="特大剑">
+                                            <MenuItem Header="双手巨剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4040000" />
+                                            <MenuItem Header="巨剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4000000" />
+                                            <MenuItem Header="看门犬大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4010000" />
+                                            <MenuItem Header="山妖黄金剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4030000" />
+                                            <MenuItem Header="山妖骑士剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4110000" />
+                                            <MenuItem Header="王室巨剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4060000" />
+                                            <MenuItem Header="剑骸大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4100000" />
+                                            <MenuItem Header="遗迹大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4080000" />
+                                            <MenuItem Header="碎星大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4050000" />
+                                            <MenuItem Header="狩猎神祇大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4070000" />
+                                            <MenuItem Header="玛利喀斯的黑剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4020000" />
+                                        </MenuItem>
+                                        <MenuItem Header="刺剑">
+                                            <MenuItem Header="细剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5020000" />
+                                            <MenuItem Header="刺剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5000000" />
+                                            <MenuItem Header="权贵刺剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5060000" />
+                                            <MenuItem Header="尊腐骑士剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5010000" />
+                                            <MenuItem Header="罗杰尔刺剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5030000" />
+                                            <MenuItem Header="蚁刺细剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5040000" />
+                                            <MenuItem Header="结冰针" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5050000" />
+                                        </MenuItem>
+                                        <MenuItem Header="重刺剑">
+                                            <MenuItem Header="大重剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6020000" />
+                                            <MenuItem Header="神皮缝针" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6010000" />
+                                            <MenuItem Header="鲜血旋流" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6000000" />
+                                            <MenuItem Header="龙王岩剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6040000" />
+                                        </MenuItem>
+                                        <MenuItem Header="曲剑">
+                                            <MenuItem Header="短弯刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7140000" />
+                                            <MenuItem Header="弯刃大刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7000000" />
+                                            <MenuItem Header="赛施尔长刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7030000" />
+                                            <MenuItem Header="巨型刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7150000" />
+                                            <MenuItem Header="山贼弯刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7040000" />
+                                            <MenuItem Header="钩剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7020000" />
+                                            <MenuItem Header="剥尸曲剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7080000" />
+                                            <MenuItem Header="螳臂刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7120000" />
+                                            <MenuItem Header="兽人弯刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7010000" />
+                                            <MenuItem Header="流水曲剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7060000" />
+                                            <MenuItem Header="蛇神弯刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7110000" />
+                                            <MenuItem Header="熔岩刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7050000" />
+                                            <MenuItem Header="诺克斯流体剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2080000" />
+                                            <MenuItem Header="艾丝缇薄翼" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7070000" />
+                                            <MenuItem Header="日蚀钩剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="7100000" />
+                                        </MenuItem>
+                                        <MenuItem Header="大曲剑">
+                                            <MenuItem Header="骑兵马刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="8020000" />
+                                            <MenuItem Header="恶兆之子大刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="8060000" />
+                                            <MenuItem Header="习武修士火纹刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="8070000" />
+                                            <MenuItem Header="兽人大弯刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="8080000" />
+                                            <MenuItem Header="猎犬长牙" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="8030000" />
+                                            <MenuItem Header="黑王大剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="8010000" />
+                                            <MenuItem Header="萨米尔弯刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="8050000" />
+                                            <MenuItem Header="土龙鳞剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="8040000" />
+                                            <MenuItem Header="蒙葛特咒剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="8100000" />
+                                        </MenuItem>
+                                        <MenuItem Header="刀">
+                                            <MenuItem Header="打刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="9000000" />
+                                            <MenuItem Header="长牙" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="9010000" />
+                                            <MenuItem Header="蛇骨刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="9080000" />
+                                            <MenuItem Header="铁陨石刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="9030000" />
+                                            <MenuItem Header="名刀月隐" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="9060000" />
+                                            <MenuItem Header="尸山血海" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="9040000" />
+                                            <MenuItem Header="龙鳞刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="9070000" />
+                                            <MenuItem Header="玛莲妮亚的义手刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="9020000" />
+                                        </MenuItem>
+                                        <MenuItem Header="双头剑">
+                                            <MenuItem Header="双头剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="10000000" />
+                                            <MenuItem Header="骑士双头剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="10030000" />
+                                            <MenuItem Header="神皮剥制剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="10010000" />
+                                            <MenuItem Header="石像鬼双头剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="10080000" />
+                                            <MenuItem Header="石像鬼黑双头剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="10090000" />
+                                            <MenuItem Header="艾琉诺拉的双头刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="10050000" />
+                                        </MenuItem>
+                                        <MenuItem Header="斧">
+                                            <MenuItem Header="分岔手斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14010000" />
+                                            <MenuItem Header="手斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14020000" />
+                                            <MenuItem Header="战斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14000000" />
+                                            <MenuItem Header="歪柄斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15010000" />
+                                            <MenuItem Header="颚齿斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14030000" />
+                                            <MenuItem Header="铁柴刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14040000" />
+                                            <MenuItem Header="高地斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14100000" />
+                                            <MenuItem Header="庆典柴刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14060000" />
+                                            <MenuItem Header="活祭品斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14110000" />
+                                            <MenuItem Header="冻壳斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14080000" />
+                                            <MenuItem Header="波纹剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14050000" />
+                                            <MenuItem Header="风暴鹰斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14140000" />
+                                            <MenuItem Header="罗泽司的斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="14120000" />
+                                        </MenuItem>
+                                        <MenuItem Header="大斧">
+                                            <MenuItem Header="巨斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15000000" />
+                                            <MenuItem Header="弦月斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15030000" />
+                                            <MenuItem Header="长柄柴刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15050000" />
+                                            <MenuItem Header="斩身大柴刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15080000" />
+                                            <MenuItem Header="恶兆猎人大柴刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15020000" />
+                                            <MenuItem Header="锈蚀船锚" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15060000" />
+                                            <MenuItem Header="肢解菜刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15120000" />
+                                            <MenuItem Header="石像鬼大斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15130000" />
+                                            <MenuItem Header="石像鬼黑斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15140000" />
+                                            <MenuItem Header="展翼大角" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15110000" />
+                                            <MenuItem Header="葛瑞克的王斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="15040000" />
+                                        </MenuItem>
+                                        <MenuItem Header="槌">
+                                            <MenuItem Header="棍棒" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11010000" />
+                                            <MenuItem Header="弯曲棍棒" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11030000" />
+                                            <MenuItem Header="兽牙棒" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11070000" />
+                                            <MenuItem Header="石棍棒" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11140000" />
+                                            <MenuItem Header="锤矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11000000" />
+                                            <MenuItem Header="晨星锤" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11050000" />
+                                            <MenuItem Header="战镐" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11040000" />
+                                            <MenuItem Header="石槌" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11080000" />
+                                            <MenuItem Header="习武修士火纹锤" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11090000" />
+                                            <MenuItem Header="梵雷的花束" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11060000" />
+                                            <MenuItem Header="众使者的笛子" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11100000" />
+                                            <MenuItem Header="诺克斯流体锤" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11120000" />
+                                            <MenuItem Header="戒指指头" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11130000" />
+                                            <MenuItem Header="百智权杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11110000" />
+                                            <MenuItem Header="玛莉卡的石槌" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="11150000" />
+                                        </MenuItem>
+                                        <MenuItem Header="大槌">
+                                            <MenuItem Header="大棍棒" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12000000" />
+                                            <MenuItem Header="弯曲大棍棒" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12080000" />
+                                            <MenuItem Header="巨型锤矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12060000" />
+                                            <MenuItem Header="十字镐" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12140000" />
+                                            <MenuItem Header="砌石槌" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12190000" />
+                                            <MenuItem Header="斗技锤" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12020000" />
+                                            <MenuItem Header="腐败斗技锤" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12210000" />
+                                            <MenuItem Header="庆典大头盖骨" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12130000" />
+                                            <MenuItem Header="巨星锤" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12180000" />
+                                            <MenuItem Header="大角槌" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12010000" />
+                                            <MenuItem Header="众使者的长笛子" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12160000" />
+                                            <MenuItem Header="尊容烛台" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12170000" />
+                                            <MenuItem Header="兽爪大锤" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12150000" />
+                                            <MenuItem Header="吞世权杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="12200000" />
+                                        </MenuItem>
+                                        <MenuItem Header="连枷">
+                                            <MenuItem Header="连枷" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="13010000" />
+                                            <MenuItem Header="黑夜骑兵连枷" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="13000000" />
+                                            <MenuItem Header="铁块连枷" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="13040000" />
+                                            <MenuItem Header="家族头连枷" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="13020000" />
+                                            <MenuItem Header="弃子的繁星" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="13030000" />
+                                        </MenuItem>
+                                        <MenuItem Header="特大武器">
+                                            <MenuItem Header="斗士大斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23040000" />
+                                            <MenuItem Header="腐败大斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23150000" />
+                                            <MenuItem Header="魔像戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23120000" />
+                                            <MenuItem Header="粉碎巨人槌" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23110000" />
+                                            <MenuItem Header="主教大火槌" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23000000" />
+                                            <MenuItem Header="巨型棍棒" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23020000" />
+                                            <MenuItem Header="山妖大槌" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23130000" />
+                                            <MenuItem Header="大龙爪" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23060000" />
+                                            <MenuItem Header="看门犬锡杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23010000" />
+                                            <MenuItem Header="化身仪式杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23070000" />
+                                            <MenuItem Header="腐败仪式杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23140000" />
+                                            <MenuItem Header="众使者的扇形笛子" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23030000" />
+                                            <MenuItem Header="基萨的刺轮" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23100000" />
+                                            <MenuItem Header="星兽半颚" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23080000" />
+                                            <MenuItem Header="葛孚雷的王斧" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="23050000" />
+                                        </MenuItem>
+                                        <MenuItem Header="矛">
+                                            <MenuItem Header="短矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16000000" />
+                                            <MenuItem Header="铁制矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16150000" />
+                                            <MenuItem Header="矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16010000" />
+                                            <MenuItem Header="阔头枪" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16050000" />
+                                            <MenuItem Header="长矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16070000" />
+                                            <MenuItem Header="棘刺棍" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16140000" />
+                                            <MenuItem Header="十字刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16110000" />
+                                            <MenuItem Header="泥人鱼叉" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16030000" />
+                                            <MenuItem Header="庆典肋骨钉耙" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16060000" />
+                                            <MenuItem Header="烛台棒" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16080000" />
+                                            <MenuItem Header="拷问烛台" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16130000" />
+                                            <MenuItem Header="结晶矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16020000" />
+                                            <MenuItem Header="腐败结晶矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16160000" />
+                                            <MenuItem Header="尊腐骑士矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16040000" />
+                                            <MenuItem Header="死亡仪式矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16120000" />
+                                            <MenuItem Header="古兰桑克斯的雷电" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="16090000" />
+                                        </MenuItem>
+                                        <MenuItem Header="大矛">
+                                            <MenuItem Header="骑兵长矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="17060000" />
+                                            <MenuItem Header="大树矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="17070000" />
+                                            <MenuItem Header="大蛇狩猎矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="17030000" />
+                                            <MenuItem Header="志留亚的树矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="17020000" />
+                                            <MenuItem Header="维克的战矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="17050000" />
+                                            <MenuItem Header="蒙格温圣矛" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="17010000" />
+                                        </MenuItem>
+                                        <MenuItem Header="戟">
+                                            <MenuItem Header="戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18000000" />
+                                            <MenuItem Header="失乡骑士戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18030000" />
+                                            <MenuItem Header="琉森戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18020000" />
+                                            <MenuItem Header="剑刃戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18090000" />
+                                            <MenuItem Header="恶兵钩剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18130000" />
+                                            <MenuItem Header="恶兵锯齿刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18070000" />
+                                            <MenuItem Header="守卫剑枪" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18110000" />
+                                            <MenuItem Header="石像鬼戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18150000" />
+                                            <MenuItem Header="石像鬼黑戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18160000" />
+                                            <MenuItem Header="黑夜骑兵剑刃戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18050000" />
+                                            <MenuItem Header="昆虫剑刃戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18010000" />
+                                            <MenuItem Header="残缺波纹戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18060000" />
+                                            <MenuItem Header="黄金戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18080000" />
+                                            <MenuItem Header="龙戟" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18140000" />
+                                            <MenuItem Header="罗蕾塔的战镰" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18100000" />
+                                            <MenuItem Header="老将的军旗" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="18040000" />
+                                        </MenuItem>
+                                        <MenuItem Header="镰刀">
+                                            <MenuItem Header="大镰刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="19000000" />
+                                            <MenuItem Header="墓地大镰刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="19010000" />
+                                            <MenuItem Header="光环镰刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="19020000" />
+                                            <MenuItem Header="展翼镰刀" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="19060000" />
+                                        </MenuItem>
+                                        <MenuItem Header="软鞭">
+                                            <MenuItem Header="软鞭" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="20000000" />
+                                            <MenuItem Header="荆棘鞭" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="20020000" />
+                                            <MenuItem Header="软鞭剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="20070000" />
+                                            <MenuItem Header="霍斯劳花瓣鞭" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="20050000" />
+                                            <MenuItem Header="熔岩烛台鞭" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="20030000" />
+                                            <MenuItem Header="巨人红发鞭" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="20060000" />
+                                        </MenuItem>
+                                        <MenuItem Header="拳头">
+                                            <MenuItem Header="搏击手套" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="21000000" />
+                                            <MenuItem Header="棘刺搏击手套" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="21010000" />
+                                            <MenuItem Header="拳剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="21100000" />
+                                            <MenuItem Header="铁球拳套" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="21070000" />
+                                            <MenuItem Header="晨星拳套" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="21080000" />
+                                            <MenuItem Header="攀附手骨" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="21110000" />
+                                            <MenuItem Header="老将的义足" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="21120000" />
+                                            <MenuItem Header="秘文帕塔剑" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="21130000" />
+                                            <MenuItem Header="接肢飞龙" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="21060000" />
+                                        </MenuItem>
+                                        <MenuItem Header="钩爪">
+                                            <MenuItem Header="钩爪" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="22000000" />
+                                            <MenuItem Header="毒蛇牙" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="22010000" />
+                                            <MenuItem Header="猎犬弯爪" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="22020000" />
+                                            <MenuItem Header="猛禽钩爪" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="22030000" />
+                                        </MenuItem>
+                                        <MenuItem Header="小弓">
+                                            <MenuItem Header="短弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="40000000" />
+                                            <MenuItem Header="复合弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="40050000" />
+                                            <MenuItem Header="红木短弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="40020000" />
+                                            <MenuItem Header="混种小弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="40010000" />
+                                            <MenuItem Header="竖琴弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="40030000" />
+                                        </MenuItem>
+                                        <MenuItem Header="长弓">
+                                            <MenuItem Header="长弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="41000000" />
+                                            <MenuItem Header="白金弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="41010000" />
+                                            <MenuItem Header="黑弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="41070000" />
+                                            <MenuItem Header="滑轮弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="41060000" />
+                                            <MenuItem Header="角弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="41020000" />
+                                            <MenuItem Header="蛇弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="41040000" />
+                                            <MenuItem Header="黄金树弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="41030000" />
+                                        </MenuItem>
+                                        <MenuItem Header="大弓">
+                                            <MenuItem Header="大弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="42040000" />
+                                            <MenuItem Header="魔像大弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="42010000" />
+                                            <MenuItem Header="黄金树大弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="42030000" />
+                                            <MenuItem Header="狮子大弓" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="42000000" />
+                                        </MenuItem>
+                                        <MenuItem Header="弩">
+                                            <MenuItem Header="士兵弩" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="43000000" />
+                                            <MenuItem Header="轻弩" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="43020000" />
+                                            <MenuItem Header="重弩" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="43030000" />
+                                            <MenuItem Header="钢弩" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="43080000" />
+                                            <MenuItem Header="克雷普的黑键" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="43110000" />
+                                            <MenuItem Header="滑轮弩" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="43050000" />
+                                            <MenuItem Header="圆月弩" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="43060000" />
+                                        </MenuItem>
+                                        <MenuItem Header="弩炮">
+                                            <MenuItem Header="携带型弩炮" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="44000000" />
+                                            <MenuItem Header="壶大炮" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="44010000" />
+                                        </MenuItem>
+                                        <MenuItem Header="手杖">
+                                            <MenuItem Header="观星杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33130000" />
+                                            <MenuItem Header="辉石杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33000000" />
+                                            <MenuItem Header="学院辉石杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33200000" />
+                                            <MenuItem Header="挖石杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33120000" />
+                                            <MenuItem Header="亚人女王杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33060000" />
+                                            <MenuItem Header="亚兹勒的辉石杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33230000" />
+                                            <MenuItem Header="卢瑟特的辉石杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33240000" />
+                                            <MenuItem Header="卡利亚辉石杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33210000" />
+                                            <MenuItem Header="卡利亚辉剑杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33170000" />
+                                            <MenuItem Header="卡利亚权杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33090000" />
+                                            <MenuItem Header="白金杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33190000" />
+                                            <MenuItem Header="丧失杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33280000" />
+                                            <MenuItem Header="格密尔辉石杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33050000" />
+                                            <MenuItem Header="结晶杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33040000" />
+                                            <MenuItem Header="腐败结晶杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33270000" />
+                                            <MenuItem Header="陨石杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33250000" />
+                                            <MenuItem Header="罪人杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33260000" />
+                                            <MenuItem Header="死王子杖" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="33180000" />
+                                        </MenuItem>
+                                        <MenuItem Header="圣印记">
+                                            <MenuItem Header="指头圣印记" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="34000000" />
+                                            <MenuItem Header="黄金树圣印记" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="34070000" />
+                                            <MenuItem Header="黄金律法圣印记" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="34060000" />
+                                            <MenuItem Header="碎石圣印记" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="34030000" />
+                                            <MenuItem Header="巨人圣印记" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="34020000" />
+                                            <MenuItem Header="狩猎神祇圣印记" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="34010000" />
+                                            <MenuItem Header="爪痕圣印记" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="34040000" />
+                                            <MenuItem Header="癫火圣印记" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="34090000" />
+                                            <MenuItem Header="龙飨印记" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="34080000" />
+                                        </MenuItem>
+                                        <MenuItem Header="火把">
+                                            <MenuItem Header="火把" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="24000000" />
+                                            <MenuItem Header="驱兽火把" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="24060000" />
+                                            <MenuItem Header="钢丝火把" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="24020000" />
+                                            <MenuItem Header="哨兵火把" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="24070000" />
+                                            <MenuItem Header="灵火火把" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="24050000" />
+                                            <MenuItem Header="托莉娜烛火" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="24040000" />
+                                        </MenuItem>
+                                        <MenuItem Header="小盾">
+                                            <MenuItem Header="半坏木盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30030000" />
+                                            <MenuItem Header="铁铆钉木盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30090000" />
+                                            <MenuItem Header="蓝白木盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30100000" />
+                                            <MenuItem Header="圣句木盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30080000" />
+                                            <MenuItem Header="红棘木盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30070000" />
+                                            <MenuItem Header="枷锁盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30040000" />
+                                            <MenuItem Header="小圆盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30000000" />
+                                            <MenuItem Header="铁圆盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30120000" />
+                                            <MenuItem Header="金黄铁盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30130000" />
+                                            <MenuItem Header="蛇人盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30020000" />
+                                            <MenuItem Header="冰纹铁盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30140000" />
+                                            <MenuItem Header="裂缝盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30110000" />
+                                            <MenuItem Header="调香师盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30010000" />
+                                            <MenuItem Header="罪人盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31170000" />
+                                            <MenuItem Header="旋角盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30190000" />
+                                            <MenuItem Header="熏烧盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30150000" />
+                                            <MenuItem Header="盘蛇盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30200000" />
+                                        </MenuItem>
+                                        <MenuItem Header="中盾">
+                                            <MenuItem Header="鹰纹木盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31270000" />
+                                            <MenuItem Header="马纹木盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31240000" />
+                                            <MenuItem Header="烛树纹木盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31250000" />
+                                            <MenuItem Header="火纹木盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31260000" />
+                                            <MenuItem Header="侵蚀木盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31020000" />
+                                            <MenuItem Header="太阳城盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31050000" />
+                                            <MenuItem Header="圆盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31070000" />
+                                            <MenuItem Header="大皮盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31230000" />
+                                            <MenuItem Header="黑皮盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31340000" />
+                                            <MenuItem Header="侵蚀皮盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31010000" />
+                                            <MenuItem Header="熨斗形盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31330000" />
+                                            <MenuItem Header="蓝纹熨斗形盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31300000" />
+                                            <MenuItem Header="红纹熨斗形盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31290000" />
+                                            <MenuItem Header="兽纹熨斗形盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31280000" />
+                                            <MenuItem Header="逆鹰纹熨斗形盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31320000" />
+                                            <MenuItem Header="日蚀纹熨斗形盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31310000" />
+                                            <MenuItem Header="鸢形盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31000000" />
+                                            <MenuItem Header="蓝金鸢形盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31100000" />
+                                            <MenuItem Header="失乡骑士盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31030000" />
+                                            <MenuItem Header="蝎纹鸢形盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31080000" />
+                                            <MenuItem Header="双鸟鸢形盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31090000" />
+                                            <MenuItem Header="黄铜盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31130000" />
+                                            <MenuItem Header="白金盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31040000" />
+                                            <MenuItem Header="兽人壶盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="30060000" />
+                                            <MenuItem Header="卡利亚骑士盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31190000" />
+                                            <MenuItem Header="白银盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31060000" />
+                                            <MenuItem Header="大乌龟壳" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="31140000" />
+                                        </MenuItem>
+                                        <MenuItem Header="大盾">
+                                            <MenuItem Header="木制大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32290000" />
+                                            <MenuItem Header="君王军大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32300000" />
+                                            <MenuItem Header="铁棘大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32050000" />
+                                            <MenuItem Header="钉墙盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32170000" />
+                                            <MenuItem Header="神圣绘画盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32140000" />
+                                            <MenuItem Header="兽纹黄金盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32090000" />
+                                            <MenuItem Header="城寨塔盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32190000" />
+                                            <MenuItem Header="交错树塔盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32200000" />
+                                            <MenuItem Header="逆鹰塔盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32210000" />
+                                            <MenuItem Header="龙塔盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32000000" />
+                                            <MenuItem Header="名门大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32020000" />
+                                            <MenuItem Header="金黄大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32270000" />
+                                            <MenuItem Header="杜鹃大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32250000" />
+                                            <MenuItem Header="红狮子大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32230000" />
+                                            <MenuItem Header="黄金大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32260000" />
+                                            <MenuItem Header="圣树纹大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32280000" />
+                                            <MenuItem Header="熔炉角盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32030000" />
+                                            <MenuItem Header="龙爪盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32040000" />
+                                            <MenuItem Header="指纹石盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32130000" />
+                                            <MenuItem Header="日蚀纹大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32240000" />
+                                            <MenuItem Header="蚂蚁头盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32220000" />
+                                            <MenuItem Header="黄金树大盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32080000" />
+                                            <MenuItem Header="水母盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32120000" />
+                                            <MenuItem Header="颜面盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32160000" />
+                                            <MenuItem Header="独眼盾" Command="{ Binding AddStartupWeapon }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="32150000" />
+                                        </MenuItem>
+                                    </MenuItem>
+                                    <MenuItem Header="护符">
+                                        <MenuItem Header="红琥珀链坠" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1000" />
+                                        <MenuItem Header="红琥珀链坠＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1001" />
+                                        <MenuItem Header="红琥珀链坠＋２" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1002" />
+                                        <MenuItem Header="红种子护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5000" />
+                                        <MenuItem Header="恩惠露滴护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5020" />
+                                        <MenuItem Header="蓝琥珀链坠" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1010" />
+                                        <MenuItem Header="蓝琥珀链坠＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1011" />
+                                        <MenuItem Header="蓝琥珀链坠＋２" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1012" />
+                                        <MenuItem Header="蓝种子护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5010" />
+                                        <MenuItem Header="绿琥珀链坠" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1020" />
+                                        <MenuItem Header="绿琥珀链坠＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1021" />
+                                        <MenuItem Header="绿琥珀链坠＋２" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1022" />
+                                        <MenuItem Header="绿龟护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1150" />
+                                        <MenuItem Header="众武护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1030" />
+                                        <MenuItem Header="众武护符＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1031" />
+                                        <MenuItem Header="大壶众武护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1032" />
+                                        <MenuItem Header="黄金树的恩惠" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1040" />
+                                        <MenuItem Header="黄金树的恩惠＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1041" />
+                                        <MenuItem Header="黄金树的恩惠＋２" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1042" />
+                                        <MenuItem Header="拉达冈的烙印" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1050" />
+                                        <MenuItem Header="拉达冈的糜烂烙印" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1051" />
+                                        <MenuItem Header="玛莉卡的烙印" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1220" />
+                                        <MenuItem Header="玛莉卡的糜烂烙印" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1221" />
+                                        <MenuItem Header="碎星的传说" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1060" />
+                                        <MenuItem Header="义手剑士的传说" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1070" />
+                                        <MenuItem Header="观星少女的传说" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1080" />
+                                        <MenuItem Header="双指的传说" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1090" />
+                                        <MenuItem Header="龙徽盾护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4000" />
+                                        <MenuItem Header="龙徽盾护符＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4001" />
+                                        <MenuItem Header="龙徽盾护符＋２" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4002" />
+                                        <MenuItem Header="龙徽大盾护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4003" />
+                                        <MenuItem Header="魔力龙徽护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4010" />
+                                        <MenuItem Header="魔力龙徽护符＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4011" />
+                                        <MenuItem Header="魔力龙徽护符＋２" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4012" />
+                                        <MenuItem Header="火龙徽护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4020" />
+                                        <MenuItem Header="火龙徽护符＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4021" />
+                                        <MenuItem Header="火龙徽护符＋２" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4022" />
+                                        <MenuItem Header="雷龙徽护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4030" />
+                                        <MenuItem Header="雷龙徽护符＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4031" />
+                                        <MenuItem Header="雷龙徽护符＋２" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4032" />
+                                        <MenuItem Header="圣龙徽护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4040" />
+                                        <MenuItem Header="圣龙徽护符＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4041" />
+                                        <MenuItem Header="圣龙徽护符＋２" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4042" />
+                                        <MenuItem Header="珍珠龙徽护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4050" />
+                                        <MenuItem Header="珍珠龙徽护符＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4051" />
+                                        <MenuItem Header="珍珠龙徽护符＋２" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4052" />
+                                        <MenuItem Header="免疫角饰品" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1170" />
+                                        <MenuItem Header="免疫角饰品＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1171" />
+                                        <MenuItem Header="健壮角饰品" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1160" />
+                                        <MenuItem Header="健壮角饰品＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1161" />
+                                        <MenuItem Header="理智角饰品" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1180" />
+                                        <MenuItem Header="理智角饰品＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1181" />
+                                        <MenuItem Header="斑斓项链" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1200" />
+                                        <MenuItem Header="斑斓项链＋１" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1201" />
+                                        <MenuItem Header="死王子的脓疮" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1190" />
+                                        <MenuItem Header="死王子的恶性脓疮" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1191" />
+                                        <MenuItem Header="短剑护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2090" />
+                                        <MenuItem Header="曲剑护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2200" />
+                                        <MenuItem Header="双头剑护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2120" />
+                                        <MenuItem Header="斧护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2130" />
+                                        <MenuItem Header="大槌护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2070" />
+                                        <MenuItem Header="矛护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2060" />
+                                        <MenuItem Header="骑枪护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2140" />
+                                        <MenuItem Header="钩爪护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2180" />
+                                        <MenuItem Header="大盾护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4100" />
+                                        <MenuItem Header="硬箭护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2150" />
+                                        <MenuItem Header="远箭护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2100" />
+                                        <MenuItem Header="魔法师球护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3000" />
+                                        <MenuItem Header="魔法师块护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3001" />
+                                        <MenuItem Header="信徒的立誓布" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3040" />
+                                        <MenuItem Header="群聚信徒的立誓布" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3050" />
+                                        <MenuItem Header="源辉石刀" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3080" />
+                                        <MenuItem Header="诺克史黛拉之月" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1140" />
+                                        <MenuItem Header="古王护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3060" />
+                                        <MenuItem Header="拉达冈的肖像" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3070" />
+                                        <MenuItem Header="咆哮链坠" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2190" />
+                                        <MenuItem Header="友好壶" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2210" />
+                                        <MenuItem Header="调香师护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2220" />
+                                        <MenuItem Header="卡利亚徽章" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6020" />
+                                        <MenuItem Header="战士壶碎片" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1230" />
+                                        <MenuItem Header="亚历山大的碎片" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1231" />
+                                        <MenuItem Header="葛孚雷的肖像" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="3090" />
+                                        <MenuItem Header="大山羊护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1210" />
+                                        <MenuItem Header="蓝色舞娘" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2110" />
+                                        <MenuItem Header="魔力对蝎" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2000" />
+                                        <MenuItem Header="火对蝎" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2020" />
+                                        <MenuItem Header="雷对蝎" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2010" />
+                                        <MenuItem Header="圣对蝎" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2030" />
+                                        <MenuItem Header="熔炉鳞护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4060" />
+                                        <MenuItem Header="熔炉羽护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4070" />
+                                        <MenuItem Header="熔炉瘤护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4110" />
+                                        <MenuItem Header="红羽七刃剑" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2040" />
+                                        <MenuItem Header="蓝羽七刃剑" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4080" />
+                                        <MenuItem Header="献斗剑护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2050" />
+                                        <MenuItem Header="献斗盾护符" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="4090" />
+                                        <MenuItem Header="染红凶刀" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5050" />
+                                        <MenuItem Header="染蓝凶刀" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5060" />
+                                        <MenuItem Header="带翼剑徽章" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2080" />
+                                        <MenuItem Header="腐败翼剑徽章" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2081" />
+                                        <MenuItem Header="米莉森的义手" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1250" />
+                                        <MenuItem Header="神皮襁褓" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5040" />
+                                        <MenuItem Header="腐败眷属的欢愉" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2170" />
+                                        <MenuItem Header="鲜血君王的欢愉" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="2160" />
+                                        <MenuItem Header="掠夺浮雕坠饰" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="5030" />
+                                        <MenuItem Header="祖灵角" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6110" />
+                                        <MenuItem Header="金色粪金龟" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1110" />
+                                        <MenuItem Header="银色粪金龟" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="1100" />
+                                        <MenuItem Header="克雷普的小瓶子" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6000" />
+                                        <MenuItem Header="隐身面纱" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6010" />
+                                        <MenuItem Header="长尾猫别针" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6040" />
+                                        <MenuItem Header="勾指伪装镜" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6080" />
+                                        <MenuItem Header="主人伪装镜" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6090" />
+                                        <MenuItem Header="夏玻利利之祸" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6050" />
+                                        <MenuItem Header="狄蒂卡之祸" Command="{ Binding AddStartupAccessory }" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" Tag="6060" />
+                                    </MenuItem>
+                                </ContextMenu>
+                            </Button.ContextMenu>
+                        </Button>
+                        <Button Width="20" Height="20" Content="-" Command="{Binding RemoveStartupItemCmd}" />
+                    </StackPanel>
+                </StackPanel>
+                <Separator Margin="20,0,0,0" />
             </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Row="2">
 
             <Separator Margin="0,10,0,10" />
 
@@ -75,7 +665,7 @@
                     <Button Width="150" Height="40" Content="取消" Command="{Binding Cancel}"
                             Visibility="{Binding InProgress, Converter={StaticResource BoolToVisibilityConverter}}"
                             FontWeight="Bold" />
-                    <Button Width="150" Height="40" Content="启动随机mod!" Command="{Binding RandomizeBingo}"
+                    <Button Width="150" Height="40" Content="启动带Mod功能游戏!" Command="{Binding RandomizeBingo}"
                             Visibility="{Binding InProgress, Converter={StaticResource InverseBoolToVisibilityConverter}}"
                             FontWeight="Bold" />
                 </Grid>
@@ -89,9 +679,9 @@
                             FontWeight="Bold" />
                 </Grid>
             </StackPanel>
-
+            <Separator Margin="0,20,0,0" />
         </StackPanel>
-        <ListBox Grid.Row="1" Name="LogListBox" ItemsSource="{Binding MessageDisplayView}" Background="Gray">
+        <ListBox Grid.Row="3" Name="LogListBox" ItemsSource="{Binding MessageDisplayView}" Background="Gray">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">

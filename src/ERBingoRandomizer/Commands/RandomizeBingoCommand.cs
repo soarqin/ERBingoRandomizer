@@ -1,9 +1,11 @@
 ﻿using ERBingoRandomizer.Randomizer;
 using ERBingoRandomizer.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ERBingoRandomizer.Utility;
@@ -12,6 +14,7 @@ namespace ERBingoRandomizer.Commands;
 
 public class RandomizeBingoCommand : AsyncCommandBase {
     private readonly MainWindowViewModel _mwViewModel;
+    private int _lastStartupItemCount = -1;
     public RandomizeBingoCommand(MainWindowViewModel mwViewModel) {
         _mwViewModel = mwViewModel;
         _mwViewModel.PropertyChanged += ViewModel_PropertyChanged;
@@ -31,8 +34,10 @@ public class RandomizeBingoCommand : AsyncCommandBase {
         _mwViewModel.ListBoxDisplay.Clear();
         var lastSeed = _mwViewModel.LastSeed;
         if (lastSeed == null || lastSeed.Seed != _mwViewModel.Seed || lastSeed.RandomStartupClasses != _mwViewModel.RandomStartupClasses || lastSeed.RandomWeapons != _mwViewModel.RandomWeapons ||
-            lastSeed.OpenGraces != _mwViewModel.OpenGraces || lastSeed.ReduceUpgradeMat != _mwViewModel.ReduceUpgradeMat) {
-            _mwViewModel.DisplayMessage("正在随机艾尔登法环规则文件");
+            lastSeed.OpenGraces != _mwViewModel.OpenGraces || lastSeed.ReduceUpgradeMat != _mwViewModel.ReduceUpgradeMat || _lastStartupItemCount != _mwViewModel.StartupItems.Count)
+        {
+            _lastStartupItemCount = _mwViewModel.StartupItems.Count;
+            _mwViewModel.DisplayMessage("正在生成艾尔登法环规则文件");
             _mwViewModel.InProgress = true;
             _mwViewModel.RandoButtonText = "Cancel";
             // _mwViewModel.Path is not null, and is a valid path to eldenring.exe, because of the conditions in CanExecute.
@@ -45,6 +50,7 @@ public class RandomizeBingoCommand : AsyncCommandBase {
                     OpenGraces = _mwViewModel.OpenGraces,
                     ReduceUpgradeMat = _mwViewModel.ReduceUpgradeMat,
                     ReduceUpgradeMatType = _mwViewModel.ReduceUpgradeMatType,
+                    StartupItems = _mwViewModel.StartupItems.Select(item => new KeyValuePair<int, int>(item.Id, item.Category)).ToArray(),
                 };
                 BingoRandomizer randomizer = await BingoRandomizer.BuildRandomizerAsync(_mwViewModel.Path!, rule, _mwViewModel.CancellationToken);
                 await Task.Run(() => randomizer.RandomizeRegulation());
@@ -52,11 +58,14 @@ public class RandomizeBingoCommand : AsyncCommandBase {
                 var seedJson = JsonSerializer.Serialize(_mwViewModel.LastSeed);
                 await File.WriteAllTextAsync(Config.LastSeedPath, seedJson);
                 _mwViewModel.FilesReady = true;
-                _mwViewModel.DisplayMessage($"随机完成。种子：{randomizer.GetSeed()}");
+                if (_mwViewModel.RandomStartupClasses || _mwViewModel.RandomWeapons)
+                    _mwViewModel.DisplayMessage($"生成完成。随机种子：{randomizer.GetSeed()}");
+                else
+                    _mwViewModel.DisplayMessage("生成完成。");
             }
             catch (OperationCanceledException)
             {
-                _mwViewModel.DisplayMessage("已取消随机");
+                _mwViewModel.DisplayMessage("已取消生成");
             }
             finally
             {
