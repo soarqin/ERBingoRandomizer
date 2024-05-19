@@ -52,5 +52,14 @@ namespace ERBingoRandomizer {
             
             File.WriteAllText(@"C:\Users\Nord\source\CSharp\ERBingoRandomizer\src\ERBingoRandomizer\Randomizer\Unk2.cs", sb.ToString());
         }
+
+        private void AddStartupItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement { ContextMenu: not null } addButton)
+            {
+                addButton.ContextMenu.PlacementTarget = addButton;
+                addButton.ContextMenu.IsOpen = true;
+            }
+        }
     }
 }

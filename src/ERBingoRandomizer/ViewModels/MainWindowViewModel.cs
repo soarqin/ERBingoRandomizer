@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Windows.Data;
@@ -21,12 +22,16 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
         LaunchEldenRing = new LaunchEldenRingCommand(this);
         PackageFiles = new PackageFilesCommand(this);
         Cancel = new CancelCommand(this);
+        AddStartupWeapon = new AddStartupWeaponCommand(this);
+        AddStartupAccessory = new AddStartupAccessoryCommand(this);
+        RemoveStartupItemCmd = new RemoveStartupItemCommand(this);
         FilesReady = AllFilesReady();
         if (FilesReady) {
             LastSeed = File.Exists(Config.LastSeedPath) ? JsonSerializer.Deserialize<SeedInfo>(File.ReadAllText(Config.LastSeedPath)) : null;
         }
         ListBoxDisplay = new ObservableCollection<string>();
         MessageDisplayView = CollectionViewSource.GetDefaultView(ListBoxDisplay);
+        StartupItems = new ObservableCollection<StartupItem>();
         getNewCancellationToken();
         _watcher = new FileSystemWatcher(Const.ME2Path);
         _watcher.NotifyFilter = NotifyFilters.Attributes
@@ -60,11 +65,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
     public bool ReduceUpgradeMat
     {
         get => _reduceUpgradeMat;
-        set
-        {
-            SetField(ref _reduceUpgradeMat, value);
-            OnPropertyChanged();
-        }
+        set => SetField(ref _reduceUpgradeMat, value);
     }
 
     public int ReduceUpgradeMatType = 1;
@@ -127,6 +128,17 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
     public ICommand LaunchEldenRing { get; }
     public ICommand PackageFiles { get; }
     public ICommand Cancel { get; }
+    public ICommand AddStartupWeapon { get; }
+    public ICommand AddStartupAccessory { get; }
+    public ICommand RemoveStartupItemCmd { get; }
+
+    private int _startupItemSelectedIndex = -1; 
+    public int StartupItemSelectedIndex
+    {
+        get => _startupItemSelectedIndex;
+        set => SetField(ref _startupItemSelectedIndex, value);
+    }
+
     private readonly ObservableCollection<string> _listBoxDisplay;
     public ObservableCollection<string> ListBoxDisplay {
         get => _listBoxDisplay;
@@ -215,5 +227,31 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
         CancellationTokenSource = new CancellationTokenSource();
         CancellationToken = CancellationTokenSource.Token;
         CancellationToken.Register(getNewCancellationToken);
+    }
+    
+    public struct StartupItem
+    {
+        public string Name { get; set; }
+        public int Id { get; set; }
+        public int Category { get; set; }
+    }
+
+    private ObservableCollection<StartupItem> _startupItems;
+
+    public ObservableCollection<StartupItem> StartupItems
+    {
+        get => _startupItems;
+        private init => SetField(ref _startupItems, value);
+    }
+
+    public void AddStartupItem(string name, int id, int cat)
+    {
+        StartupItems.Add(new StartupItem { Name = name, Id = id, Category = cat });
+    }
+
+    public void RemoveStartupItem(int index)
+    {
+        if (index < 0 || index >= StartupItems.Count) return;
+        StartupItems.RemoveAt(index);
     }
 }
