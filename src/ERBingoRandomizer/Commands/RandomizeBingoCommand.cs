@@ -34,7 +34,8 @@ public class RandomizeBingoCommand : AsyncCommandBase {
         _mwViewModel.ListBoxDisplay.Clear();
         var lastSeed = _mwViewModel.LastSeed;
         if (lastSeed == null || lastSeed.Seed != _mwViewModel.Seed || lastSeed.RandomStartupClasses != _mwViewModel.RandomStartupClasses || lastSeed.RandomWeapons != _mwViewModel.RandomWeapons ||
-            lastSeed.OpenGraces != _mwViewModel.OpenGraces || lastSeed.ReduceUpgradeMat != _mwViewModel.ReduceUpgradeMat || _lastStartupItemCount != _mwViewModel.StartupItems.Count)
+            lastSeed.OpenGraces != _mwViewModel.OpenGraces || lastSeed.ReduceUpgradeMat != _mwViewModel.ReduceUpgradeMat || lastSeed.GreaterItemLootChance != _mwViewModel.GreaterItemLootChance ||
+            _lastStartupItemCount != _mwViewModel.StartupItems.Count)
         {
             _lastStartupItemCount = _mwViewModel.StartupItems.Count;
             _mwViewModel.DisplayMessage("正在生成艾尔登法环规则文件");
@@ -50,11 +51,12 @@ public class RandomizeBingoCommand : AsyncCommandBase {
                     OpenGraces = _mwViewModel.OpenGraces,
                     ReduceUpgradeMat = _mwViewModel.ReduceUpgradeMat,
                     ReduceUpgradeMatType = _mwViewModel.ReduceUpgradeMatType,
+                    GreaterItemLootChance = _mwViewModel.GreaterItemLootChance,
                     StartupItems = _mwViewModel.StartupItems.Select(item => new KeyValuePair<int, int>(item.Id, item.Category)).ToArray(),
                 };
                 BingoRandomizer randomizer = await BingoRandomizer.BuildRandomizerAsync(_mwViewModel.Path!, rule, _mwViewModel.CancellationToken);
                 await Task.Run(() => randomizer.RandomizeRegulation());
-                _mwViewModel.LastSeed = new SeedInfo(randomizer.GetSeed(), Util.GetShaRegulation256Hash(), _mwViewModel.RandomStartupClasses, _mwViewModel.RandomWeapons, _mwViewModel.OpenGraces, _mwViewModel.ReduceUpgradeMat, _mwViewModel.ReduceUpgradeMatType);
+                _mwViewModel.LastSeed = new SeedInfo(randomizer.GetSeed(), Util.GetShaRegulation256Hash(), _mwViewModel.RandomStartupClasses, _mwViewModel.RandomWeapons, _mwViewModel.OpenGraces, _mwViewModel.ReduceUpgradeMat, _mwViewModel.ReduceUpgradeMatType, _mwViewModel.GreaterItemLootChance);
                 var seedJson = JsonSerializer.Serialize(_mwViewModel.LastSeed);
                 await File.WriteAllTextAsync(Config.LastSeedPath, seedJson);
                 _mwViewModel.FilesReady = true;
