@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Windows.Data;
@@ -89,6 +88,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
             OnPropertyChanged(nameof(ReduceUpgradeMatType));
         }
     }
+    public bool GreaterItemLootChance { get; set; } = false;
     private string _path = Util.TryGetGameInstallLocation(@"\steamapps\common\ELDEN RING\Game\eldenring.exe") ?? string.Empty;
     public string Path {
         get => _path;
@@ -166,6 +166,7 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
             OpenGraces = value?.OpenGraces ?? false;
             ReduceUpgradeMat = value?.ReduceUpgradeMat ?? false;
             ReduceUpgradeMatType = value?.ReduceUpgradeMatType ?? 1;
+            GreaterItemLootChance = value?.GreaterItemLootChance ?? false;
             if (SetField(ref _lastSeed, value)) {
                 OnPropertyChanged(nameof(LastSeedText));
             }

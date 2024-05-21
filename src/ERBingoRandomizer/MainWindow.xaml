@@ -60,10 +60,13 @@
                                  IsChecked="{Binding IsReduceUpgradeMatType1, Mode=TwoWay}"
                                  IsEnabled="{Binding ReduceUpgradeMat}"
                                  FontSize="13" FontWeight="Medium" />
+                    <CheckBox Width="280" Content="随机掉落装备的概率提升到50%" VerticalAlignment="Center"
+                              IsChecked="{Binding GreaterItemLootChance, Mode=TwoWay}"
+                              FontSize="13" FontWeight="Medium" />
                 </StackPanel>
                 <StackPanel Orientation="Vertical">
                     <Label Content="开局获取道具" />
-                    <ListBox Name="StartupItems" ItemsSource="{Binding StartupItems}" Width="120" Height="55" SelectedIndex="{Binding StartupItemSelectedIndex, Mode=TwoWay}">
+                    <ListBox Name="StartupItems" ItemsSource="{Binding StartupItems}" Width="120" Height="75" SelectedIndex="{Binding StartupItemSelectedIndex, Mode=TwoWay}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Name}" />

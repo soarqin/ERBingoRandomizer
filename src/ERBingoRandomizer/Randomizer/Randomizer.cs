@@ -22,6 +22,7 @@ public struct RandomizeRule {
     public bool OpenGraces;
     public bool ReduceUpgradeMat;
     public int ReduceUpgradeMatType;
+    public bool GreaterItemLootChance;
     public KeyValuePair<int, int>[] StartupItems;
 }
 
@@ -33,6 +34,7 @@ public partial class BingoRandomizer {
     private readonly bool _randomWeapons;
     private readonly bool _openGraces;
     private readonly int _reduceUpgradeMatType;
+    private readonly bool _greaterItemLootChance;
     private readonly KeyValuePair<int, int>[] _startupItems;
     
     //static async method that behaves like a constructor    
@@ -51,6 +53,7 @@ public partial class BingoRandomizer {
         _randomWeapons = rule.RandomWeapons;
         _openGraces = rule.OpenGraces;
         _reduceUpgradeMatType = rule.ReduceUpgradeMat ? rule.ReduceUpgradeMatType : -1;
+        _greaterItemLootChance = rule.GreaterItemLootChance;
         _startupItems = rule.StartupItems;
         _classRandomizer = new Season3ClassRandomizer(new Season2LevelRandomizer(_resources.Random), _resources);
         _cancellationToken = cancellationToken;
@@ -85,6 +88,11 @@ public partial class BingoRandomizer {
         }
         _cancellationToken.ThrowIfCancellationRequested();
         addStartupItems();
+        _cancellationToken.ThrowIfCancellationRequested();
+        if (_greaterItemLootChance) {
+            increaseItemLotChance();
+            _cancellationToken.ThrowIfCancellationRequested();
+        }
         writeFiles();
         Logger.WriteLog(_resources.Seed);
         return Task.CompletedTask;
@@ -126,7 +134,6 @@ public partial class BingoRandomizer {
 
     private void addStartupItems()
     {
-
         int newEventId = 279551112;  // Arbitrary number
         EMEVD common = _resources.CommonEmevd;
         if (common == null) {
@@ -160,6 +167,74 @@ public partial class BingoRandomizer {
         }
         // Initialize new event
         constrEvent.Instructions.Add(new EMEVD.Instruction(2000, 0, new List<object> { 0, newEventId, 0 }));
+    }
+
+    private void increaseItemLotChance()
+    {
+        var cols = _resources.ItemLotParamEnemy.Cells;
+        Param.Column? itemId1Col = null;
+        Param.Column? itemId2Col = null;
+        Param.Column? itemId3Col = null;
+        Param.Column? itemCat1Col = null;
+        Param.Column? itemCat2Col = null;
+        Param.Column? itemBasePoint1Col = null;
+        Param.Column? itemBasePoint2Col = null;
+        foreach (var c in cols)
+        {
+            switch (c.Def.InternalName)
+            {
+                case "lotItemId01":
+                    itemId1Col = c;
+                    break;
+                case "lotItemId02":
+                    itemId2Col = c;
+                    break;
+                case "lotItemId03":
+                    itemId3Col = c;
+                    break;
+                case "lotItemCategory01":
+                    itemCat1Col = c;
+                    break;
+                case "lotItemCategory02":
+                    itemCat2Col = c;
+                    break;
+                case "lotItemBasePoint01":
+                    itemBasePoint1Col = c;
+                    break;
+                case "lotItemBasePoint02":
+                    itemBasePoint2Col = c;
+                    break;
+            }
+        }
+        if (itemId1Col == null || itemId2Col == null || itemId3Col == null || itemCat1Col == null || itemCat2Col == null || itemBasePoint1Col == null || itemBasePoint2Col == null) return;
+        foreach (Param.Row row in _resources.ItemLotParamEnemy.Rows)
+        {
+            if ((int)itemId3Col.GetValue(row) > 0)
+            {
+                continue;
+            }
+
+            var itemId1 = (int)itemId1Col.GetValue(row);
+            var itemId2 = (int)itemId2Col.GetValue(row);
+            if (itemId1 <= 0 && itemId2 > 0 && (int)itemCat2Col.GetValue(row) is 2 or 3)
+            {
+                var chance = (ushort)itemBasePoint2Col.GetValue(row);
+                if (chance < 500)
+                {
+                    itemBasePoint1Col.SetValue(row, (ushort)500);
+                    itemBasePoint2Col.SetValue(row, (ushort)500);
+                }
+            }
+            else if (itemId1 > 0 && itemId2 <= 0 && (int)itemCat1Col.GetValue(row) is 2 or 3)
+            {
+                var chance = (ushort)itemBasePoint1Col.GetValue(row);
+                if (chance < 500)
+                {
+                    itemBasePoint1Col.SetValue(row, (ushort)500);
+                    itemBasePoint2Col.SetValue(row, (ushort)500);
+                }
+            }
+        }
     }
 
     private void randomizeItemLotParams() {
