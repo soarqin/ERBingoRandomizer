@@ -125,10 +125,10 @@ public partial class BingoRandomizer {
     private void addItemWithLotID(int id, int itemId, int itemCat, int itemCount)
     {
         Param.Row row = new Param.Row(id, "", _resources.ItemLotParamMap);
-        row.Cells.First(c => c.Def.InternalName == "lotItemId01").SetValue(row, itemId);
-        row.Cells.First(c => c.Def.InternalName == "lotItemCategory01").SetValue(row, itemCat);
-        row.Cells.First(c => c.Def.InternalName == "lotItemBasePoint01").SetValue(row, (ushort)100);
-        row.Cells.First(c => c.Def.InternalName == "lotItemNum01").SetValue(row, (byte)itemCount);
+        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemId01")?.SetValue(row, itemId);
+        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemCategory01")?.SetValue(row, itemCat);
+        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemBasePoint01")?.SetValue(row, (ushort)100);
+        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemNum01")?.SetValue(row, (byte)itemCount);
         _resources.ItemLotParamMap.AddRow(row);
     }
 
