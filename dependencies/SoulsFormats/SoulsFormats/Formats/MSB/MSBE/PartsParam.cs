@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Runtime.Serialization;
+using System.Xml.Serialization;
+using SoulsFormats;
 
 namespace SoulsFormats
 {
@@ -153,166 +156,210 @@ namespace SoulsFormats
         /// </summary>
         public abstract class Part : Entry, IMsbPart
         {
+            public enum GameEditionDisableType : uint
+            {
+                NeverDisable = 0,
+
+                /// <summary>
+                /// Disabled if Localize.PkgEdition byte ptr [rcx+0B73h] == 1.
+                /// The value is 1 in all released versions of Elden Ring.
+                /// </summary>
+                DisableInRelease = 1,
+
+                /// <summary>
+                /// Disabled if Localize.PkgEdition byte ptr [rcx+0B73h] == 2.
+                /// The value is 1 in all released versions of Elden Ring.
+                /// </summary>
+                DisableInPkgEditionFlag2 = 2,
+
+                DisableInNetworkTest = 3,
+            }
+
             private protected abstract PartType Type { get; }
             private protected abstract bool HasUnk1 { get; }
             private protected abstract bool HasUnk2 { get; }
             private protected abstract bool HasGparamConfig { get; }
             private protected abstract bool HasSceneGparamConfig { get; }
-            private protected abstract bool HasUnk7 { get; }
+            private protected abstract bool HasGrassConfig { get; }
             private protected abstract bool HasUnk8 { get; }
             private protected abstract bool HasUnk9 { get; }
-            private protected abstract bool HasUnk10 { get; }
+            private protected abstract bool HasTileLoadConfig { get; }
             private protected abstract bool HasUnk11 { get; }
 
             /// <summary>
             /// The model used by this part; requires an entry in ModelParam.
             /// </summary>
             public string ModelName { get; set; }
-            private int ModelIndex;
+            [IndexProperty]
+            [XmlIgnore]
+            private int ModelIndex { get; set; }
 
             /// <summary>
-            /// Unknown
+            /// Involved with serialization.
             /// </summary>
-            public int Unk08 { get; set; }
+            public int InstanceID { get; set; }
 
             /// <summary>
             /// A path to a .sib file, presumably some kind of editor placeholder.
             /// </summary>
+            [IgnoreProperty]
             public string SibPath { get; set; }
 
             /// <summary>
             /// Location of the part.
             /// </summary>
+            [PositionProperty]
             public Vector3 Position { get; set; }
 
             /// <summary>
             /// Rotation of the part.
             /// </summary>
+            [RotationProperty]
             public Vector3 Rotation { get; set; }
 
             /// <summary>
             /// Scale of the part; only works for map pieces and objects.
             /// </summary>
+            [ScaleProperty]
             public Vector3 Scale { get; set; }
 
             /// <summary>
-            /// Unknown
+            /// 1 disables the part, 2 and 3 are unknown.
             /// </summary>
-            public int Unk44 { get; set; }
+            [IgnoreProperty]
+            public GameEditionDisableType GameEditionDisable { get; set; } = GameEditionDisableType.NeverDisable;
 
             /// <summary>
             /// Very speculative
             /// </summary>
-            public int MapStudioLayer { get; set; }
+            [IgnoreProperty]
+            public uint MapStudioLayer { get; set; }
 
             /// <summary>
             /// Identifies the part in event scripts.
             /// </summary>
+            [EnemyProperty]
             public uint EntityID { get; set; }
 
             /// <summary>
-            /// Unknown.
+            /// Enables use of PartsDrawParamID. If false, asset param is used instead.
             /// </summary>
-            public byte UnkE04 { get; set; }
+            [IgnoreProperty]
+            public byte isUsePartsDrawParamID { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
-            public byte LodParamID { get; set; }
+            [MSBParamReference(ParamName = "PartsDrawParam")]
+            [IgnoreProperty]
+            public short PartsDrawParamID { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
-            public byte UnkE09 { get; set; }
-
-            /// <summary>
-            /// Unknown.
-            /// </summary>
+            [IgnoreProperty]
             public sbyte IsPointLightShadowSrc { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte UnkE0B { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool IsShadowSrc { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte IsStaticShadowSrc { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte IsCascade3ShadowSrc { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte UnkE0F { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte UnkE10 { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool IsShadowDest { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool IsShadowOnly { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool DrawByReflectCam { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool DrawOnlyReflectCam { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte EnableOnAboveShadow { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public bool DisablePointLightEffect { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte UnkE17 { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public int UnkE18 { get; set; }
 
             /// <summary>
             /// Allows multiple parts to be identified by the same entity ID.
             /// </summary>
-            public uint[] EntityGroupIDs { get; private set; }
+            [EnemyProperty]
+            public uint[] EntityGroupIDs { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public short UnkE3C { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public short UnkE3E { get; set; }
 
             private protected Part(string name)
@@ -342,7 +389,7 @@ namespace SoulsFormats
             {
                 long start = br.Position;
                 long nameOffset = br.ReadInt64();
-                Unk08 = br.ReadInt32();
+                InstanceID = br.ReadInt32();
                 br.AssertUInt32((uint)Type);
                 br.ReadInt32(); // ID
                 ModelIndex = br.ReadInt32();
@@ -350,8 +397,8 @@ namespace SoulsFormats
                 Position = br.ReadVector3();
                 Rotation = br.ReadVector3();
                 Scale = br.ReadVector3();
-                Unk44 = br.ReadInt32();
-                MapStudioLayer = br.ReadInt32();
+                GameEditionDisable = br.ReadEnum32<GameEditionDisableType>();
+                MapStudioLayer = br.ReadUInt32();
                 br.AssertInt32(0);
                 long unkOffset1 = br.ReadInt64();
                 long unkOffset2 = br.ReadInt64();
@@ -384,13 +431,13 @@ namespace SoulsFormats
                     throw new InvalidDataException($"Unexpected {nameof(gparamOffset)} 0x{gparamOffset:X} in type {GetType()}.");
                 if (HasSceneGparamConfig ^ sceneGParamOffset != 0)
                     throw new InvalidDataException($"Unexpected {nameof(sceneGParamOffset)} 0x{sceneGParamOffset:X} in type {GetType()}.");
-                if (HasUnk7 ^ unkOffset7 != 0)
+                if (HasGrassConfig ^ unkOffset7 != 0)
                     throw new InvalidDataException($"Unexpected {nameof(unkOffset7)} 0x{unkOffset7:X} in type {GetType()}.");
                 if (HasUnk8 ^ unkOffset8 != 0)
                     throw new InvalidDataException($"Unexpected {nameof(unkOffset8)} 0x{unkOffset8:X} in type {GetType()}.");
                 if (HasUnk9 ^ unkOffset9 != 0)
                     throw new InvalidDataException($"Unexpected {nameof(unkOffset9)} 0x{unkOffset9:X} in type {GetType()}.");
-                if (HasUnk10 ^ unkOffset10 != 0)
+                if (HasTileLoadConfig ^ unkOffset10 != 0)
                     throw new InvalidDataException($"Unexpected {nameof(unkOffset10)} 0x{unkOffset10:X} in type {GetType()}.");
                 if (HasUnk11 ^ unkOffset11 != 0)
                     throw new InvalidDataException($"Unexpected {nameof(unkOffset11)} 0x{unkOffset11:X} in type {GetType()}.");
@@ -431,10 +478,10 @@ namespace SoulsFormats
                     ReadSceneGparamConfig(br);
                 }
 
-                if (HasUnk7)
+                if (HasGrassConfig)
                 {
                     br.Position = start + unkOffset7;
-                    ReadUnk7(br);
+                    ReadGrassConfig(br);
                 }
 
                 if (HasUnk8)
@@ -449,10 +496,10 @@ namespace SoulsFormats
                     ReadUnk9(br);
                 }
 
-                if (HasUnk10)
+                if (HasTileLoadConfig)
                 {
                     br.Position = start + unkOffset10;
-                    ReadUnk10(br);
+                    ReadTileLoad(br);
                 }
 
                 if (HasUnk11)
@@ -465,12 +512,11 @@ namespace SoulsFormats
             private void ReadEntityData(BinaryReaderEx br)
             {
                 EntityID = br.ReadUInt32();
-                UnkE04 = br.ReadByte();
+                isUsePartsDrawParamID = br.ReadByte();
                 br.AssertByte(0);
                 br.AssertByte(0);
                 br.AssertByte(0); // Former lantern ID
-                LodParamID = br.ReadByte();
-                UnkE09 = br.ReadByte();
+                PartsDrawParamID = br.ReadInt16();
                 IsPointLightShadowSrc = br.ReadSByte(); // Seems to be 0 or -1
                 UnkE0B = br.ReadByte();
                 IsShadowSrc = br.ReadBoolean();
@@ -506,8 +552,8 @@ namespace SoulsFormats
             private protected virtual void ReadSceneGparamConfig(BinaryReaderEx br)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadSceneGparamConfig)}.");
 
-            private protected virtual void ReadUnk7(BinaryReaderEx br)
-                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadUnk7)}.");
+            private protected virtual void ReadGrassConfig(BinaryReaderEx br)
+                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadGrassConfig)}.");
 
             private protected virtual void ReadUnk8(BinaryReaderEx br)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadUnk8)}.");
@@ -515,8 +561,8 @@ namespace SoulsFormats
             private protected virtual void ReadUnk9(BinaryReaderEx br)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadUnk9)}.");
 
-            private protected virtual void ReadUnk10(BinaryReaderEx br)
-                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadUnk10)}.");
+            private protected virtual void ReadTileLoad(BinaryReaderEx br)
+                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadTileLoad)}.");
 
             private protected virtual void ReadUnk11(BinaryReaderEx br)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(ReadUnk11)}.");
@@ -525,7 +571,7 @@ namespace SoulsFormats
             {
                 long start = bw.Position;
                 bw.ReserveInt64("NameOffset");
-                bw.WriteInt32(Unk08);
+                bw.WriteInt32(InstanceID);
                 bw.WriteUInt32((uint)Type);
                 bw.WriteInt32(id);
                 bw.WriteInt32(ModelIndex);
@@ -533,8 +579,8 @@ namespace SoulsFormats
                 bw.WriteVector3(Position);
                 bw.WriteVector3(Rotation);
                 bw.WriteVector3(Scale);
-                bw.WriteInt32(Unk44);
-                bw.WriteInt32(MapStudioLayer);
+                bw.WriteInt32((int)GameEditionDisable);
+                bw.WriteUInt32(MapStudioLayer);
                 bw.WriteInt32(0);
                 bw.ReserveInt64("UnkOffset1");
                 bw.ReserveInt64("UnkOffset2");
@@ -604,10 +650,10 @@ namespace SoulsFormats
                     bw.FillInt64("SceneGparamOffset", 0);
                 }
 
-                if (HasUnk7)
+                if (HasGrassConfig)
                 {
                     bw.FillInt64("UnkOffset7", bw.Position - start);
-                    WriteUnk7(bw);
+                    WriteGrassConfig(bw);
                 }
                 else
                 {
@@ -634,10 +680,10 @@ namespace SoulsFormats
                     bw.FillInt64("UnkOffset9", 0);
                 }
 
-                if (HasUnk10)
+                if (HasTileLoadConfig)
                 {
                     bw.FillInt64("UnkOffset10", bw.Position - start);
-                    WriteUnk10(bw);
+                    WriteTileLoad(bw);
                 }
                 else
                 {
@@ -658,12 +704,11 @@ namespace SoulsFormats
             private void WriteEntityData(BinaryWriterEx bw)
             {
                 bw.WriteUInt32(EntityID);
-                bw.WriteByte(UnkE04);
+                bw.WriteByte(isUsePartsDrawParamID);
                 bw.WriteByte(0);
                 bw.WriteByte(0);
                 bw.WriteByte(0);
-                bw.WriteByte(LodParamID);
-                bw.WriteByte(UnkE09);
+                bw.WriteInt16(PartsDrawParamID);
                 bw.WriteSByte(IsPointLightShadowSrc);
                 bw.WriteByte(UnkE0B);
                 bw.WriteBoolean(IsShadowSrc);
@@ -700,8 +745,8 @@ namespace SoulsFormats
             private protected virtual void WriteSceneGparamConfig(BinaryWriterEx bw)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteSceneGparamConfig)}.");
 
-            private protected virtual void WriteUnk7(BinaryWriterEx bw)
-                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteUnk7)}.");
+            private protected virtual void WriteGrassConfig(BinaryWriterEx bw)
+                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteGrassConfig)}.");
 
             private protected virtual void WriteUnk8(BinaryWriterEx bw)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteUnk8)}.");
@@ -709,8 +754,8 @@ namespace SoulsFormats
             private protected virtual void WriteUnk9(BinaryWriterEx bw)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteUnk9)}.");
 
-            private protected virtual void WriteUnk10(BinaryWriterEx bw)
-                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteUnk10)}.");
+            private protected virtual void WriteTileLoad(BinaryWriterEx bw)
+                => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteTileLoad)}.");
 
             private protected virtual void WriteUnk11(BinaryWriterEx bw)
                 => throw new NotImplementedException($"Type {GetType()} missing valid {nameof(WriteUnk11)}.");
@@ -722,7 +767,7 @@ namespace SoulsFormats
 
             internal virtual void GetIndices(MSBE msb, Entries entries)
             {
-                ModelIndex = MSB.FindIndex(entries.Models, ModelName);
+                ModelIndex = MSB.FindIndex(this, entries.Models, ModelName);
             }
 
             /// <summary>
@@ -741,46 +786,52 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public uint[] DisplayGroups { get; private set; }
+                public uint[] DisplayGroups { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public uint[] DrawGroups { get; private set; }
+                public uint[] DrawGroups { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public uint[] CollisionMask { get; private set; }
+                public uint[] CollisionMask { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte Condition1 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte Condition2 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkC2 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkC3 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkC4 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkC6 { get; set; }
 
                 /// <summary>
@@ -805,6 +856,8 @@ namespace SoulsFormats
                 public UnkStruct1 DeepCopy()
                 {
                     var unk1 = (UnkStruct1)MemberwiseClone();
+                    unk1.DisplayGroups = (uint[])DisplayGroups.Clone();
+                    unk1.DrawGroups = (uint[])DrawGroups.Clone();
                     unk1.CollisionMask = (uint[])CollisionMask.Clone();
                     return unk1;
                 }
@@ -846,21 +899,24 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Condition { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int[] DispGroups { get; private set; }
+                public uint[] DispGroups { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short Unk24 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short Unk26 { get; set; }
 
                 /// <summary>
@@ -868,7 +924,7 @@ namespace SoulsFormats
                 /// </summary>
                 public UnkStruct2()
                 {
-                    DispGroups = new int[8];
+                    DispGroups = new uint[8];
                 }
 
                 /// <summary>
@@ -877,14 +933,14 @@ namespace SoulsFormats
                 public UnkStruct2 DeepCopy()
                 {
                     var unk2 = (UnkStruct2)MemberwiseClone();
-                    unk2.DispGroups = (int[])DispGroups.Clone();
+                    unk2.DispGroups = (uint[])DispGroups.Clone();
                     return unk2;
                 }
 
                 internal UnkStruct2(BinaryReaderEx br)
                 {
                     Condition = br.ReadInt32();
-                    DispGroups = br.ReadInt32s(8);
+                    DispGroups = br.ReadUInt32s(8);
                     Unk24 = br.ReadInt16();
                     Unk26 = br.ReadInt16();
                     br.AssertPattern(0x20, 0x00);
@@ -893,7 +949,7 @@ namespace SoulsFormats
                 internal void Write(BinaryWriterEx bw)
                 {
                     bw.WriteInt32(Condition);
-                    bw.WriteInt32s(DispGroups);
+                    bw.WriteUInt32s(DispGroups);
                     bw.WriteInt16(Unk24);
                     bw.WriteInt16(Unk26);
                     bw.WritePattern(0x20, 0x00);
@@ -976,43 +1032,47 @@ namespace SoulsFormats
                 public float TransitionTime { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// Value of the hundredths place of a Gparam to override use.
                 /// </summary>
-                public sbyte Unk18 { get; set; }
+                public sbyte GparamSubID_Base { get; set; }
+
+                /// <summary>
+                /// Value of the hundredths place of a Gparam to override Base with.
+                /// </summary>
+                public sbyte GparamSubID_Override1 { get; set; }
+
+                /// <summary>
+                /// Value of the hundredths place of a Gparam to override Base and Override 1 with.
+                /// </summary>
+                public sbyte GparamSubID_Override2 { get; set; }
+
+                /// <summary>
+                /// Value of the hundredths place of a Gparam to override Base and Override 1 and Override 2 with.
+                /// </summary>
+                public sbyte GparamSubID_Override3 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public sbyte Unk19 { get; set; }
-
-                /// <summary>
-                /// Unknown.
-                /// </summary>
-                public sbyte Unk1A { get; set; }
-
-                /// <summary>
-                /// Unknown.
-                /// </summary>
-                public sbyte Unk1B { get; set; }
-
-                /// <summary>
-                /// Unknown.
-                /// </summary>
+                [IgnoreProperty]
                 public sbyte Unk1C { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public sbyte Unk1D { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public sbyte Unk20 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public sbyte Unk21 { get; set; }
 
                 /// <summary>
@@ -1021,10 +1081,10 @@ namespace SoulsFormats
                 public SceneGparamConfig()
                 {
                     TransitionTime = 0.0f;
-                    Unk18 = -1;
-                    Unk19 = -1;
-                    Unk1A = -1;
-                    Unk1B = -1;
+                    GparamSubID_Base = -1;
+                    GparamSubID_Override1 = -1;
+                    GparamSubID_Override2 = -1;
+                    GparamSubID_Override3 = -1;
                     Unk1C = -1;
                     Unk1D = -1;
                     Unk20 = -1;
@@ -1045,10 +1105,10 @@ namespace SoulsFormats
                     br.AssertPattern(16, 0x00);
                     TransitionTime = br.ReadSingle();
                     br.AssertInt32(0);
-                    Unk18 = br.ReadSByte();
-                    Unk19 = br.ReadSByte();
-                    Unk1A = br.ReadSByte();
-                    Unk1B = br.ReadSByte();
+                    GparamSubID_Base = br.ReadSByte();
+                    GparamSubID_Override1 = br.ReadSByte();
+                    GparamSubID_Override2 = br.ReadSByte();
+                    GparamSubID_Override3 = br.ReadSByte();
                     Unk1C = br.ReadSByte();
                     Unk1D = br.ReadSByte();
                     br.AssertSByte(0);
@@ -1065,10 +1125,10 @@ namespace SoulsFormats
                     bw.WritePattern(16, 0x00);
                     bw.WriteSingle(TransitionTime);
                     bw.WriteInt32(0);
-                    bw.WriteSByte(Unk18);
-                    bw.WriteSByte(Unk19);
-                    bw.WriteSByte(Unk1A);
-                    bw.WriteSByte(Unk1B);
+                    bw.WriteSByte(GparamSubID_Base);
+                    bw.WriteSByte(GparamSubID_Override1);
+                    bw.WriteSByte(GparamSubID_Override2);
+                    bw.WriteSByte(GparamSubID_Override3);
                     bw.WriteSByte(Unk1C);
                     bw.WriteSByte(Unk1D);
                     bw.WriteSByte(0);
@@ -1084,37 +1144,43 @@ namespace SoulsFormats
             /// <summary>
             /// Unknown. Grass related?
             /// </summary>
-            public class UnkStruct7
+            public class GrassConfig
             {
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk00 { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId0 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk04 { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId1 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk08 { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId2 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk0C { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId3 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk10 { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId4 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int Unk14 { get; set; }
+                [MSBParamReference(ParamName = "GrassTypeParam")]
+                public int GrassParamId5 { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1124,36 +1190,36 @@ namespace SoulsFormats
                 /// <summary>
                 /// Creates an UnkStruct7 with default values.
                 /// </summary>
-                public UnkStruct7() { }
+                public GrassConfig() { }
 
                 /// <summary>
                 /// Creates a deep copy of the struct.
                 /// </summary>
-                public UnkStruct7 DeepCopy()
+                public GrassConfig DeepCopy()
                 {
-                    return (UnkStruct7)MemberwiseClone();
+                    return (GrassConfig)MemberwiseClone();
                 }
 
-                internal UnkStruct7(BinaryReaderEx br)
+                internal GrassConfig(BinaryReaderEx br)
                 {
-                    Unk00 = br.ReadInt32();
-                    Unk04 = br.ReadInt32();
-                    Unk08 = br.ReadInt32();
-                    Unk0C = br.ReadInt32();
-                    Unk10 = br.ReadInt32();
-                    Unk14 = br.ReadInt32();
+                    GrassParamId0 = br.ReadInt32();
+                    GrassParamId1 = br.ReadInt32();
+                    GrassParamId2 = br.ReadInt32();
+                    GrassParamId3 = br.ReadInt32();
+                    GrassParamId4 = br.ReadInt32();
+                    GrassParamId5 = br.ReadInt32();
                     Unk18 = br.ReadInt32();
                     br.AssertInt32(0);
                 }
 
                 internal void Write(BinaryWriterEx bw)
                 {
-                    bw.WriteInt32(Unk00);
-                    bw.WriteInt32(Unk04);
-                    bw.WriteInt32(Unk08);
-                    bw.WriteInt32(Unk0C);
-                    bw.WriteInt32(Unk10);
-                    bw.WriteInt32(Unk14);
+                    bw.WriteInt32(GrassParamId0);
+                    bw.WriteInt32(GrassParamId1);
+                    bw.WriteInt32(GrassParamId2);
+                    bw.WriteInt32(GrassParamId3);
+                    bw.WriteInt32(GrassParamId4);
+                    bw.WriteInt32(GrassParamId5);
                     bw.WriteInt32(Unk18);
                     bw.WriteInt32(0);
                 }
@@ -1167,6 +1233,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk00 { get; set; }
 
                 /// <summary>
@@ -1258,66 +1325,74 @@ namespace SoulsFormats
             /// <summary>
             /// Unknown.
             /// </summary>
-            public class UnkStruct10
+            public class TileLoadConfig
             {
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int MapID { get; set; }
+                public byte[] MapID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk04 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk0C { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk10 { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// Unknown culling behaviour field for extreme height differences. Values 0000 - 10000.
                 /// </summary>
-                public int Unk14 { get; set; }
+                public int CullingHeightBehavior { get; set; }
 
                 /// <summary>
                 /// Creates an UnkStruct7 with default values.
                 /// </summary>
-                public UnkStruct10() { }
+                public TileLoadConfig()
+                {
+                    MapID = new byte[4];
+                }
 
                 /// <summary>
                 /// Creates a deep copy of the struct.
                 /// </summary>
-                public UnkStruct10 DeepCopy()
+                public TileLoadConfig DeepCopy()
                 {
-                    return (UnkStruct10)MemberwiseClone();
+                    var unks10 = (TileLoadConfig)MemberwiseClone();
+                    unks10.MapID = (byte[])MapID.Clone();
+                    return unks10;
                 }
 
-                internal UnkStruct10(BinaryReaderEx br)
+                internal TileLoadConfig(BinaryReaderEx br)
                 {
-                    MapID = br.ReadInt32();
+                    MapID = br.ReadBytes(4);
                     Unk04 = br.ReadInt32();
                     br.AssertInt32(0);
                     Unk0C = br.ReadInt32();
                     Unk10 = br.AssertInt32(0, 1);
-                    Unk14 = br.ReadInt32();
+                    CullingHeightBehavior = br.ReadInt32();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                 }
 
                 internal void Write(BinaryWriterEx bw)
                 {
-                    bw.WriteInt32(MapID);
+                    bw.WriteBytes(MapID);
                     bw.WriteInt32(Unk04);
                     bw.WriteInt32(0);
                     bw.WriteInt32(Unk0C);
                     bw.WriteInt32(Unk10);
-                    bw.WriteInt32(Unk14);
+                    bw.WriteInt32(CullingHeightBehavior);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                 }
@@ -1331,11 +1406,13 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk00 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk04 { get; set; }
 
                 /// <summary>
@@ -1386,10 +1463,10 @@ namespace SoulsFormats
                 private protected override bool HasUnk2 => false;
                 private protected override bool HasGparamConfig => true;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => true;
+                private protected override bool HasGrassConfig => true;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => true;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => true;
 
                 /// <summary>
@@ -1405,7 +1482,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct7 Unk7 { get; set; }
+                public GrassConfig Grass { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1420,7 +1497,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1434,10 +1511,10 @@ namespace SoulsFormats
                 {
                     Unk1 = new UnkStruct1();
                     Gparam = new GparamConfig();
-                    Unk7 = new UnkStruct7();
+                    Grass = new GrassConfig();
                     Unk8 = new UnkStruct8();
                     Unk9 = new UnkStruct9();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                     Unk11 = new UnkStruct11();
                 }
 
@@ -1446,10 +1523,10 @@ namespace SoulsFormats
                     var piece = (MapPiece)part;
                     piece.Unk1 = Unk1.DeepCopy();
                     piece.Gparam = Gparam.DeepCopy();
-                    piece.Unk7 = Unk7.DeepCopy();
+                    piece.Grass = Grass.DeepCopy();
                     piece.Unk8 = Unk8.DeepCopy();
                     piece.Unk9 = Unk9.DeepCopy();
-                    piece.Unk10 = Unk10.DeepCopy();
+                    piece.TileLoad = TileLoad.DeepCopy();
                     piece.Unk11 = Unk11.DeepCopy();
                 }
 
@@ -1463,10 +1540,10 @@ namespace SoulsFormats
 
                 private protected override void ReadUnk1(BinaryReaderEx br) => Unk1 = new UnkStruct1(br);
                 private protected override void ReadGparamConfig(BinaryReaderEx br) => Gparam = new GparamConfig(br);
-                private protected override void ReadUnk7(BinaryReaderEx br) => Unk7 = new UnkStruct7(br);
+                private protected override void ReadGrassConfig(BinaryReaderEx br) => Grass = new GrassConfig(br);
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
                 private protected override void ReadUnk9(BinaryReaderEx br) => Unk9 = new UnkStruct9(br);
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
                 private protected override void ReadUnk11(BinaryReaderEx br) => Unk11 = new UnkStruct11(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -1477,10 +1554,10 @@ namespace SoulsFormats
 
                 private protected override void WriteUnk1(BinaryWriterEx bw) => Unk1.Write(bw);
                 private protected override void WriteGparamConfig(BinaryWriterEx bw) => Gparam.Write(bw);
-                private protected override void WriteUnk7(BinaryWriterEx bw) => Unk7.Write(bw);
+                private protected override void WriteGrassConfig(BinaryWriterEx bw) => Grass.Write(bw);
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
                 private protected override void WriteUnk9(BinaryWriterEx bw) => Unk9.Write(bw);
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
                 private protected override void WriteUnk11(BinaryWriterEx bw) => Unk11.Write(bw);
             }
 
@@ -1493,10 +1570,10 @@ namespace SoulsFormats
                 private protected override bool HasUnk2 => false;
                 private protected override bool HasGparamConfig => true;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => false;
+                private protected override bool HasGrassConfig => false;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => false;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => false;
 
                 /// <summary>
@@ -1517,95 +1594,118 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// An ID in NPCThinkParam that determines the enemy's AI characteristics.
                 /// </summary>
+                [EnemyProperty]
                 [MSBParamReference(ParamName = "NpcThinkParam")]
                 public int ThinkParamID { get; set; }
 
                 /// <summary>
                 /// An ID in NPCParam that determines a variety of enemy properties.
                 /// </summary>
+                [EnemyProperty]
                 [MSBParamReference(ParamName = "NpcParam")]
                 public int NPCParamID { get; set; }
 
                 /// <summary>
                 /// Talk ID
                 /// </summary>
+                [EnemyProperty]
                 public int TalkID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
+                [EnemyProperty]
                 public bool UnkT15 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [EnemyProperty]
                 public short PlatoonID { get; set; }
 
                 /// <summary>
                 /// An ID in CharaInitParam that determines a human's inventory and stats.
                 /// </summary>
+                [EnemyProperty]
                 [MSBParamReference(ParamName = "CharaInitParam")]
                 public int CharaInitID { get; set; }
 
                 /// <summary>
                 /// Should reference the collision the enemy starts on.
                 /// </summary>
+                [EnemyProperty]
                 [MSBReference(ReferenceType = typeof(Collision))]
                 public string CollisionPartName { get; set; }
-                private int CollisionPartIndex;
+
+                [IndexProperty]
+                [XmlIgnore]
+                private int CollisionPartIndex { get; set; }
 
                 /// <summary>
                 /// Walk route followed by this enemy.
                 /// </summary>
+                [EnemyProperty]
                 [MSBReference(ReferenceType = typeof(Event.PatrolInfo))]
                 public string WalkRouteName { get; set; }
-                private short WalkRouteIndex;
+
+                [IndexProperty]
+                [XmlIgnore]
+                private short WalkRouteIndex { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT24 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT28 { get; set; }
 
                 /// <summary>
                 /// ID in ChrActivateConditionParam that affects enemy appearance conditions.
                 /// </summary>
+                [EnemyProperty]
                 [MSBParamReference(ParamName = "ChrActivateConditionParam")]
                 public int ChrActivateCondParamID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT34 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [EnemyProperty]
                 public int BackupEventAnimID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT3C { get; set; }
 
                 /// <summary>
                 /// Refers to SpEffectSetParam ID. Applies SpEffects to an enemy.
                 /// </summary>
+                [EnemyProperty]
                 [MSBParamReference(ParamName = "SpEffectSetParam")]
-                public int[] SpEffectSetParamID { get; private set; }
+                public int[] SpEffectSetParamID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public float UnkT84 { get; set; }
 
                 private protected EnemyBase() : base("cXXXX_XXXX")
@@ -1613,7 +1713,7 @@ namespace SoulsFormats
                     Unk1 = new UnkStruct1();
                     Gparam = new GparamConfig();
                     Unk8 = new UnkStruct8();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                     SpEffectSetParamID = new int[4];
                     ThinkParamID = -1;
                     NPCParamID = -1;
@@ -1631,7 +1731,7 @@ namespace SoulsFormats
                     enemy.Unk1 = Unk1.DeepCopy();
                     enemy.Gparam = Gparam.DeepCopy();
                     enemy.Unk8 = Unk8.DeepCopy();
-                    enemy.Unk10 = Unk10.DeepCopy();
+                    enemy.TileLoad = TileLoad.DeepCopy();
                     enemy.SpEffectSetParamID = (int[])SpEffectSetParamID.Clone();
                 }
 
@@ -1678,7 +1778,7 @@ namespace SoulsFormats
 
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
 
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
@@ -1721,7 +1821,7 @@ namespace SoulsFormats
 
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
 
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
 
                 internal override void GetNames(MSBE msb, Entries entries)
                 {
@@ -1733,8 +1833,8 @@ namespace SoulsFormats
                 internal override void GetIndices(MSBE msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    CollisionPartIndex = MSB.FindIndex(entries.Parts, CollisionPartName);
-                    WalkRouteIndex = (short)MSB.FindIndex(msb.Events.PatrolInfo, WalkRouteName);
+                    CollisionPartIndex = MSB.FindIndex(this, entries.Parts, CollisionPartName);
+                    WalkRouteIndex = (short)MSB.FindIndex(this, msb.Events.PatrolInfo, WalkRouteName);
                 }
             }
 
@@ -1763,10 +1863,10 @@ namespace SoulsFormats
                 private protected override bool HasUnk2 => false;
                 private protected override bool HasGparamConfig => false;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => false;
+                private protected override bool HasGrassConfig => false;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => false;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => false;
 
                 /// <summary>
@@ -1782,11 +1882,12 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int Unk00 { get; set; }
 
                 /// <summary>
@@ -1796,7 +1897,7 @@ namespace SoulsFormats
                 {
                     Unk1 = new UnkStruct1();
                     Unk8 = new UnkStruct8();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                 }
 
                 private protected override void DeepCopyTo(Part part)
@@ -1804,7 +1905,7 @@ namespace SoulsFormats
                     var player = (Player)part;
                     player.Unk1 = Unk1.DeepCopy();
                     player.Unk8 = Unk8.DeepCopy();
-                    player.Unk10 = Unk10.DeepCopy();
+                    player.TileLoad = TileLoad.DeepCopy();
                 }
 
                 internal Player(BinaryReaderEx br) : base(br) { }
@@ -1819,7 +1920,7 @@ namespace SoulsFormats
 
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
 
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
@@ -1831,7 +1932,7 @@ namespace SoulsFormats
 
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
 
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
             }
 
             /// <summary>
@@ -1839,15 +1940,38 @@ namespace SoulsFormats
             /// </summary>
             public class Collision : Part
             {
+                /// <summary>
+                /// HitFilterType
+                /// </summary>
+                public enum HitFilterType : byte
+                {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+                    Standard = 8,
+                    CameraOnly = 9,
+                    EnemyOnly = 11,
+                    FallDeathCam = 13,
+                    Kill = 15,
+                    Unk16 = 16,
+                    Unk17 = 17,
+                    Unk19 = 19,
+                    Unk20 = 20,
+                    Unk21 = 21,
+                    Unk22 = 22,
+                    Unk23 = 23,
+                    Unk24 = 24,
+                    Unk29 = 29,
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+                }
+
                 private protected override PartType Type => PartType.Collision;
                 private protected override bool HasUnk1 => true;
                 private protected override bool HasUnk2 => true;
                 private protected override bool HasGparamConfig => true;
                 private protected override bool HasSceneGparamConfig => true;
-                private protected override bool HasUnk7 => false;
+                private protected override bool HasGrassConfig => false;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => false;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => true;
 
                 /// <summary>
@@ -1878,7 +2002,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1886,73 +2010,91 @@ namespace SoulsFormats
                 public UnkStruct11 Unk11 { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// Sets collision behavior. Fall collision, death collision, enemy-only collision, etc.
                 /// </summary>
-                public byte UnkT00 { get; set; }
+                public HitFilterType HitFilterID { get; set; } = HitFilterType.Standard;
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT01 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT02 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public bool UnkT03 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public float UnkT04 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
+                public int UnkT06 { get; set; }
+
+                /// <summary>
+                /// Unknown.
+                /// </summary>
+                [IgnoreProperty]
                 public float UnkT14 { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// ID of location text to display when stepping onto this collision.
                 /// </summary>
-                public int UnkT18 { get; set; }
+                public int LocationTextID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT1C { get; set; }
 
                 /// <summary>
                 /// Used to determine invasion eligibility.
                 /// </summary>
+                [MSBParamReference(ParamName = "PlayRegionParam")]
                 public int PlayRegionID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT24 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT26 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT30 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT34 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT35 { get; set; }
 
                 /// <summary>
@@ -1963,16 +2105,19 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT3C { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT3E { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public float UnkT40 { get; set; }
 
                 /// <summary>
@@ -1983,11 +2128,13 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT4C { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT4E { get; set; }
 
                 /// <summary>
@@ -2000,7 +2147,7 @@ namespace SoulsFormats
                     Gparam = new GparamConfig();
                     SceneGparam = new SceneGparamConfig();
                     Unk8 = new UnkStruct8();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                     Unk11 = new UnkStruct11();
                 }
 
@@ -2012,7 +2159,7 @@ namespace SoulsFormats
                     collision.Gparam = Gparam.DeepCopy();
                     collision.SceneGparam = SceneGparam.DeepCopy();
                     collision.Unk8 = Unk8.DeepCopy();
-                    collision.Unk10 = Unk10.DeepCopy();
+                    collision.TileLoad = TileLoad.DeepCopy();
                     collision.Unk11 = Unk11.DeepCopy();
                 }
 
@@ -2020,16 +2167,16 @@ namespace SoulsFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    UnkT00 = br.ReadByte(); // Pav says Type, did it change?
+                    HitFilterID = br.ReadEnum8<HitFilterType>();
                     UnkT01 = br.ReadByte();
                     UnkT02 = br.ReadByte();
                     UnkT03 = br.ReadBoolean();
                     UnkT04 = br.ReadSingle();
-                    br.AssertInt32(0);
+                    UnkT06 = br.ReadInt32();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     UnkT14 = br.ReadSingle();
-                    UnkT18 = br.ReadInt32();
+                    LocationTextID = br.ReadInt32();
                     UnkT1C = br.ReadInt32();
                     PlayRegionID = br.ReadInt32();
                     UnkT24 = br.ReadInt16();
@@ -2047,7 +2194,7 @@ namespace SoulsFormats
                     UnkT40 = br.ReadSingle();
                     br.AssertInt32(0);
                     EnableFastTravelEventFlagID = br.ReadUInt32();
-                    UnkT4C = br.AssertInt16(0, 1);
+                    UnkT4C = br.AssertInt16(0, 1, 2);
                     UnkT4E = br.ReadInt16();
                 }
 
@@ -2056,21 +2203,21 @@ namespace SoulsFormats
                 private protected override void ReadGparamConfig(BinaryReaderEx br) => Gparam = new GparamConfig(br);
                 private protected override void ReadSceneGparamConfig(BinaryReaderEx br) => SceneGparam = new SceneGparamConfig(br);
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
                 private protected override void ReadUnk11(BinaryReaderEx br) => Unk11 = new UnkStruct11(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteByte(UnkT00);
+                    bw.WriteByte((byte)HitFilterID);
                     bw.WriteByte(UnkT01);
                     bw.WriteByte(UnkT02);
                     bw.WriteBoolean(UnkT03);
                     bw.WriteSingle(UnkT04);
-                    bw.WriteInt32(0);
+                    bw.WriteInt32(UnkT06);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                     bw.WriteSingle(UnkT14);
-                    bw.WriteInt32(UnkT18);
+                    bw.WriteInt32(LocationTextID);
                     bw.WriteInt32(UnkT1C);
                     bw.WriteInt32(PlayRegionID);
                     bw.WriteInt16(UnkT24);
@@ -2097,7 +2244,7 @@ namespace SoulsFormats
                 private protected override void WriteGparamConfig(BinaryWriterEx bw) => Gparam.Write(bw);
                 private protected override void WriteSceneGparamConfig(BinaryWriterEx bw) => SceneGparam.Write(bw);
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
                 private protected override void WriteUnk11(BinaryWriterEx bw) => Unk11.Write(bw);
             }
 
@@ -2111,16 +2258,21 @@ namespace SoulsFormats
                 private protected override bool HasUnk2 => false;
                 private protected override bool HasGparamConfig => true;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => false;
+                private protected override bool HasGrassConfig => false;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => false;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => false;
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
                 public UnkStruct1 Unk1 { get; set; }
+
+                /// <summary>
+                /// Unknown.
+                /// </summary>
+                public int UnkT18 { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2135,7 +2287,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Creates a MapPiece with default values.
@@ -2145,7 +2297,7 @@ namespace SoulsFormats
                     Unk1 = new UnkStruct1();
                     Gparam = new GparamConfig();
                     Unk8 = new UnkStruct8();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                 }
 
                 private protected override void DeepCopyTo(Part part)
@@ -2154,7 +2306,7 @@ namespace SoulsFormats
                     asset.Unk1 = Unk1.DeepCopy();
                     asset.Gparam = Gparam.DeepCopy();
                     asset.Unk8 = Unk8.DeepCopy();
-                    asset.Unk10 = Unk10.DeepCopy();
+                    asset.TileLoad = TileLoad.DeepCopy();
                 }
 
                 internal DummyAsset(BinaryReaderEx br) : base(br) { }
@@ -2167,14 +2319,14 @@ namespace SoulsFormats
                     br.AssertInt32(0);
                     br.AssertInt32(-1);
                     br.AssertInt32(-1);
-                    br.AssertInt32(-1);
+                    UnkT18 = br.ReadInt32();
                     br.AssertInt32(-1);
                 }
 
                 private protected override void ReadUnk1(BinaryReaderEx br) => Unk1 = new UnkStruct1(br);
                 private protected override void ReadGparamConfig(BinaryReaderEx br) => Gparam = new GparamConfig(br);
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
@@ -2184,14 +2336,14 @@ namespace SoulsFormats
                     bw.WriteInt32(0);
                     bw.WriteInt32(-1);
                     bw.WriteInt32(-1);
-                    bw.WriteInt32(-1);
+                    bw.WriteInt32(UnkT18);
                     bw.WriteInt32(-1);
                 }
 
                 private protected override void WriteUnk1(BinaryWriterEx bw) => Unk1.Write(bw);
                 private protected override void WriteGparamConfig(BinaryWriterEx bw) => Gparam.Write(bw);
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
             }
 
             /// <summary>
@@ -2219,10 +2371,10 @@ namespace SoulsFormats
                 private protected override bool HasUnk2 => true;
                 private protected override bool HasGparamConfig => false;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => false;
+                private protected override bool HasGrassConfig => false;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => false;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => true;
 
                 /// <summary>
@@ -2243,7 +2395,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2254,32 +2406,40 @@ namespace SoulsFormats
                 /// The collision part to attach to.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Collision))]
+                [NoRenderGroupInheritance()]
                 public string CollisionName { get; set; }
-                private int CollisionIndex;
+
+                [IndexProperty]
+                [XmlIgnore]
+                private int CollisionIndex { get; set; }
 
                 /// <summary>
                 /// The map to load when on this collision.
                 /// </summary>
-                public byte[] MapID { get; private set; }
+                public byte[] MapID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT08 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public bool UnkT09 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT0A { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public bool UnkT0B { get; set; }
 
                 /// <summary>
@@ -2291,7 +2451,7 @@ namespace SoulsFormats
                     Unk2 = new UnkStruct2();
                     MapID = new byte[4];
                     Unk8 = new UnkStruct8();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                     Unk11 = new UnkStruct11();
                 }
 
@@ -2302,7 +2462,7 @@ namespace SoulsFormats
                     connect.Unk2 = Unk2.DeepCopy();
                     connect.MapID = (byte[])MapID.Clone();
                     connect.Unk8 = Unk8.DeepCopy();
-                    connect.Unk10 = Unk10.DeepCopy();
+                    connect.TileLoad = TileLoad.DeepCopy();
                     connect.Unk11 = Unk11.DeepCopy();
                 }
 
@@ -2322,7 +2482,7 @@ namespace SoulsFormats
                 private protected override void ReadUnk1(BinaryReaderEx br) => Unk1 = new UnkStruct1(br);
                 private protected override void ReadUnk2(BinaryReaderEx br) => Unk2 = new UnkStruct2(br);
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
                 private protected override void ReadUnk11(BinaryReaderEx br) => Unk11 = new UnkStruct11(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -2339,7 +2499,7 @@ namespace SoulsFormats
                 private protected override void WriteUnk1(BinaryWriterEx bw) => Unk1.Write(bw);
                 private protected override void WriteUnk2(BinaryWriterEx bw) => Unk2.Write(bw);
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
                 private protected override void WriteUnk11(BinaryWriterEx bw) => Unk11.Write(bw);
 
                 internal override void GetNames(MSBE msb, Entries entries)
@@ -2351,7 +2511,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSBE msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    CollisionIndex = MSB.FindIndex(msb.Parts.Collisions, CollisionName);
+                    CollisionIndex = MSB.FindIndex(this, msb.Parts.Collisions, CollisionName);
                 }
             }
 
@@ -2365,10 +2525,10 @@ namespace SoulsFormats
                 private protected override bool HasUnk2 => true;
                 private protected override bool HasGparamConfig => true;
                 private protected override bool HasSceneGparamConfig => false;
-                private protected override bool HasUnk7 => true;
+                private protected override bool HasGrassConfig => true;
                 private protected override bool HasUnk8 => true;
                 private protected override bool HasUnk9 => true;
-                private protected override bool HasUnk10 => true;
+                private protected override bool HasTileLoadConfig => true;
                 private protected override bool HasUnk11 => true;
 
                 /// <summary>
@@ -2389,7 +2549,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct7 Unk7 { get; set; }
+                public GrassConfig Grass { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2404,7 +2564,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public UnkStruct10 Unk10 { get; set; }
+                public TileLoadConfig TileLoad { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -2414,21 +2574,30 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
+                public short UnkT00 { get; set; }
+                /// <summary>
+                /// Unknown.
+                /// </summary>
+                [IgnoreProperty]
                 public short UnkT02 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT10 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public bool UnkT11 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT12 { get; set; }
 
                 /// <summary>
@@ -2439,73 +2608,92 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT1E { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT24 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT28 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT30 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT34 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Part))]
-                public string[] UnkPartNames { get; private set; }
-                private int[] UnkPartIndices;
+                public string[] UnkPartNames { get; set; }
+
+                [IndexProperty]
+                [XmlIgnore]
+                private int[] UnkPartIndices { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public bool UnkT50 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT51 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT53 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int UnkT54 { get; set; }
+                [MSBReference(ReferenceType = typeof(Part))]
+                public string UnkT54PartName { get; set; }
+                [XmlIgnore]
+                [IndexProperty]
+                private int UnkT54PartIndex { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int UnkT58 { get; set; }
+                [EldenRingAssetMask]
+                public int UnkModelMaskAndAnimID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT5C { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT60 { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public int UnkT64 { get; set; }
 
                 /// <summary>
@@ -2516,11 +2704,13 @@ namespace SoulsFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public short Unk00 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public bool Unk04 { get; set; }
 
                     /// <summary>
@@ -2531,26 +2721,31 @@ namespace SoulsFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk1C { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public short Unk24 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public short Unk26 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk28 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk2C { get; set; }
 
                     /// <summary>
@@ -2623,36 +2818,43 @@ namespace SoulsFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk00 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk04 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public float Unk14 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk1C { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk1D { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk1E { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk1F { get; set; }
 
                     /// <summary>
@@ -2723,84 +2925,108 @@ namespace SoulsFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk00 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public float Unk04 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk09 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk0A { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk0B { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public short Unk0C { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public short Unk0E { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public float Unk10 { get; set; }
 
                     /// <summary>
-                    /// Unknown.
+                    /// Disables the asset when the specified map is loaded.
                     /// </summary>
-                    public int Unk14 { get; set; }
+                    public sbyte[] DisableWhenMapLoadedMapID { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk18 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk1C { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public int Unk20 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk24 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public bool Unk25 { get; set; }
+
+                    /// <summary>
+                    /// Unknown.
+                    /// </summary>
+                    [IgnoreProperty]
+                    public int Unk28 { get; set; }
 
                     /// <summary>
                     /// Creates an AssetUnkStruct3 with default values.
                     /// </summary>
-                    public AssetUnkStruct3() { }
+                    public AssetUnkStruct3()
+                    {
+                        DisableWhenMapLoadedMapID = new sbyte[4];
+                    }
 
                     /// <summary>
                     /// Creates a deep copy of the struct.
                     /// </summary>
                     public AssetUnkStruct3 DeepCopy()
                     {
-                        return (AssetUnkStruct3)MemberwiseClone();
+                        var unks3 = (AssetUnkStruct3)MemberwiseClone();
+                        unks3.DisableWhenMapLoadedMapID = (sbyte[])DisableWhenMapLoadedMapID.Clone();
+                        return unks3;
                     }
 
                     internal AssetUnkStruct3(BinaryReaderEx br)
@@ -2814,7 +3040,7 @@ namespace SoulsFormats
                         Unk0C = br.ReadInt16();
                         Unk0E = br.ReadInt16();
                         Unk10 = br.ReadSingle();
-                        Unk14 = br.ReadInt32();
+                        DisableWhenMapLoadedMapID = br.ReadSBytes(4);
                         Unk18 = br.ReadInt32();
                         Unk1C = br.ReadInt32();
                         Unk20 = br.ReadInt32();
@@ -2822,7 +3048,7 @@ namespace SoulsFormats
                         Unk25 = br.ReadBoolean();
                         br.AssertByte(0);
                         br.AssertByte(0);
-                        br.AssertInt32(0);
+                        Unk28 = br.ReadInt32();
                         br.AssertInt32(0);
                         br.AssertInt32(0);
                         br.AssertInt32(0);
@@ -2841,7 +3067,7 @@ namespace SoulsFormats
                         bw.WriteInt16(Unk0C);
                         bw.WriteInt16(Unk0E);
                         bw.WriteSingle(Unk10);
-                        bw.WriteInt32(Unk14);
+                        bw.WriteSBytes(DisableWhenMapLoadedMapID);
                         bw.WriteInt32(Unk18);
                         bw.WriteInt32(Unk1C);
                         bw.WriteInt32(Unk20);
@@ -2849,7 +3075,7 @@ namespace SoulsFormats
                         bw.WriteBoolean(Unk25);
                         bw.WriteByte(0);
                         bw.WriteByte(0);
-                        bw.WriteInt32(0);
+                        bw.WriteInt32(Unk28);
                         bw.WriteInt32(0);
                         bw.WriteInt32(0);
                         bw.WriteInt32(0);
@@ -2866,21 +3092,25 @@ namespace SoulsFormats
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public bool Unk00 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk01 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public byte Unk02 { get; set; }
 
                     /// <summary>
                     /// Unknown.
                     /// </summary>
+                    [IgnoreProperty]
                     public bool Unk03 { get; set; }
 
                     /// <summary>
@@ -2971,10 +3201,10 @@ namespace SoulsFormats
                     Unk1 = new UnkStruct1();
                     Unk2 = new UnkStruct2();
                     Gparam = new GparamConfig();
-                    Unk7 = new UnkStruct7();
+                    Grass = new GrassConfig();
                     Unk8 = new UnkStruct8();
                     Unk9 = new UnkStruct9();
-                    Unk10 = new UnkStruct10();
+                    TileLoad = new TileLoadConfig();
                     Unk11 = new UnkStruct11();
 
                     AssetUnk1 = new AssetUnkStruct1();
@@ -2991,10 +3221,10 @@ namespace SoulsFormats
                     asset.Unk1 = Unk1.DeepCopy();
                     asset.Unk2 = Unk2.DeepCopy();
                     asset.Gparam = Gparam.DeepCopy();
-                    asset.Unk7 = Unk7.DeepCopy();
+                    asset.Grass = Grass.DeepCopy();
                     asset.Unk8 = Unk8.DeepCopy();
                     asset.Unk9 = Unk9.DeepCopy();
-                    asset.Unk10 = Unk10.DeepCopy();
+                    asset.TileLoad = TileLoad.DeepCopy();
                     asset.Unk11 = Unk11.DeepCopy();
 
                     asset.AssetUnk1 = AssetUnk1.DeepCopy();
@@ -3009,7 +3239,7 @@ namespace SoulsFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    br.AssertInt16(0);
+                    UnkT00 = br.ReadInt16();
                     UnkT02 = br.AssertInt16(0, 1);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -3033,8 +3263,8 @@ namespace SoulsFormats
                     UnkT51 = br.ReadByte();
                     br.AssertByte(0);
                     UnkT53 = br.ReadByte();
-                    UnkT54 = br.ReadInt32();
-                    UnkT58 = br.ReadInt32();
+                    UnkT54PartIndex = br.ReadInt32();
+                    UnkModelMaskAndAnimID = br.ReadInt32();
                     UnkT5C = br.ReadInt32();
                     UnkT60 = br.ReadInt32();
                     UnkT64 = br.ReadInt32();
@@ -3054,15 +3284,15 @@ namespace SoulsFormats
                 private protected override void ReadUnk1(BinaryReaderEx br) => Unk1 = new UnkStruct1(br);
                 private protected override void ReadUnk2(BinaryReaderEx br) => Unk2 = new UnkStruct2(br);
                 private protected override void ReadGparamConfig(BinaryReaderEx br) => Gparam = new GparamConfig(br);
-                private protected override void ReadUnk7(BinaryReaderEx br) => Unk7 = new UnkStruct7(br);
+                private protected override void ReadGrassConfig(BinaryReaderEx br) => Grass = new GrassConfig(br);
                 private protected override void ReadUnk8(BinaryReaderEx br) => Unk8 = new UnkStruct8(br);
                 private protected override void ReadUnk9(BinaryReaderEx br) => Unk9 = new UnkStruct9(br);
-                private protected override void ReadUnk10(BinaryReaderEx br) => Unk10 = new UnkStruct10(br);
+                private protected override void ReadTileLoad(BinaryReaderEx br) => TileLoad = new TileLoadConfig(br);
                 private protected override void ReadUnk11(BinaryReaderEx br) => Unk11 = new UnkStruct11(br);
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteInt16(0);
+                    bw.WriteInt16(UnkT00);
                     bw.WriteInt16(UnkT02);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
@@ -3086,8 +3316,8 @@ namespace SoulsFormats
                     bw.WriteByte(UnkT51);
                     bw.WriteByte(0);
                     bw.WriteByte(UnkT53);
-                    bw.WriteInt32(UnkT54);
-                    bw.WriteInt32(UnkT58);
+                    bw.WriteInt32(UnkT54PartIndex);
+                    bw.WriteInt32(UnkModelMaskAndAnimID);
                     bw.WriteInt32(UnkT5C);
                     bw.WriteInt32(UnkT60);
                     bw.WriteInt32(UnkT64);
@@ -3106,22 +3336,24 @@ namespace SoulsFormats
                 private protected override void WriteUnk1(BinaryWriterEx bw) => Unk1.Write(bw);
                 private protected override void WriteUnk2(BinaryWriterEx bw) => Unk2.Write(bw);
                 private protected override void WriteGparamConfig(BinaryWriterEx bw) => Gparam.Write(bw);
-                private protected override void WriteUnk7(BinaryWriterEx bw) => Unk7.Write(bw);
+                private protected override void WriteGrassConfig(BinaryWriterEx bw) => Grass.Write(bw);
                 private protected override void WriteUnk8(BinaryWriterEx bw) => Unk8.Write(bw);
                 private protected override void WriteUnk9(BinaryWriterEx bw) => Unk9.Write(bw);
-                private protected override void WriteUnk10(BinaryWriterEx bw) => Unk10.Write(bw);
+                private protected override void WriteTileLoad(BinaryWriterEx bw) => TileLoad.Write(bw);
                 private protected override void WriteUnk11(BinaryWriterEx bw) => Unk11.Write(bw);
 
                 internal override void GetNames(MSBE msb, Entries entries)
                 {
                     base.GetNames(msb, entries);
                     UnkPartNames = MSB.FindNames(entries.Parts, UnkPartIndices);
+                    UnkT54PartName = MSB.FindName(entries.Parts, UnkT54PartIndex);
                 }
 
                 internal override void GetIndices(MSBE msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    UnkPartIndices = MSB.FindIndices(entries.Parts, UnkPartNames);
+                    UnkPartIndices = MSB.FindIndices(this, entries.Parts, UnkPartNames);
+                    UnkT54PartIndex = MSB.FindIndex(entries.Parts, UnkT54PartName);
                 }
             }
         }

@@ -119,7 +119,7 @@ static class Util {
     public static PARAMDEF XmlDeserialize(string xmlString) {
         XmlDocument xml = new();
         xml.LoadXml(xmlString);
-        return PARAMDEF.XmlSerializer.Deserialize(xml);
+        return PARAMDEF.XmlSerializer.Deserialize(xml, false);
     }
     public static ulong ComputeHash(string path, BHD5.Game game) {
         string hashable = path.Trim().Replace('\\', '/').ToLowerInvariant();

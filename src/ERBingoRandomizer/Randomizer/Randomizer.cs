@@ -104,9 +104,9 @@ public partial class BingoRandomizer {
             _resources.ItemLotParamEnemy.Rows.Where(id => !Unk.unkItemLotParamEnemyWeapons.Contains(id.ID));
 
         foreach (Param.Row row in itemLotParamEnemy.Concat(itemLotParamMap)) {
-            Param.Column[] itemIds = row.Cells.Take(Const.ItemLots).ToArray();
-            Param.Column[] categories = row.Cells.Skip(Const.CategoriesStart).Take(Const.ItemLots).ToArray();
-            Param.Column[] chances = row.Cells.Skip(Const.ChanceStart).Take(Const.ItemLots).ToArray();
+            Param.Column[] itemIds = row.Columns.Take(Const.ItemLots).ToArray();
+            Param.Column[] categories = row.Columns.Skip(Const.CategoriesStart).Take(Const.ItemLots).ToArray();
+            Param.Column[] chances = row.Columns.Skip(Const.ChanceStart).Take(Const.ItemLots).ToArray();
             int totalWeight = chances.Sum(a => (ushort)a.GetValue(row));
             for (int i = 0; i < Const.ItemLots; i++) {
                 int category = (int)categories[i].GetValue(row);
@@ -212,8 +212,8 @@ public partial class BingoRandomizer {
         Logger.LogItem("");
 
         foreach (Param.Row row in _resources.ItemLotParamEnemy.Rows.Concat(_resources.ItemLotParamMap.Rows)) {
-            Param.Column[] itemIds = row.Cells.Take(Const.ItemLots).ToArray();
-            Param.Column[] categories = row.Cells.Skip(Const.CategoriesStart).Take(Const.ItemLots).ToArray();
+            Param.Column[] itemIds = row.Columns.Take(Const.ItemLots).ToArray();
+            Param.Column[] categories = row.Columns.Skip(Const.CategoriesStart).Take(Const.ItemLots).ToArray();
             for (int i = 0; i < Const.ItemLots; i++) {
                 int category = (int)categories[i].GetValue(row);
                 if (category != Const.ItemLotWeaponCategory && category != Const.ItemLotCustomWeaponCategory) {
@@ -355,9 +355,9 @@ public partial class BingoRandomizer {
         }
 
         foreach (Param.Row row in _resources.ItemLotParamEnemy.Rows.Concat(_resources.ItemLotParamMap.Rows)) {
-            Param.Column[] itemIds = row.Cells.Take(Const.ItemLots).ToArray();
-            Param.Column[] categories = row.Cells.Skip(Const.CategoriesStart).Take(Const.ItemLots).ToArray();
-            Param.Column[] chances = row.Cells.Skip(Const.ChanceStart).Take(Const.ItemLots).ToArray();
+            Param.Column[] itemIds = row.Columns.Take(Const.ItemLots).ToArray();
+            Param.Column[] categories = row.Columns.Skip(Const.CategoriesStart).Take(Const.ItemLots).ToArray();
+            Param.Column[] chances = row.Columns.Skip(Const.ChanceStart).Take(Const.ItemLots).ToArray();
             int totalWeight = chances.Sum(a => (ushort)a.GetValue(row));
             for (int i = 0; i < Const.ItemLots; i++) {
                 int category = (int)categories[i].GetValue(row);
@@ -408,8 +408,8 @@ public partial class BingoRandomizer {
         }
 
         foreach (Param.Row row in _resources.ItemLotParamEnemy.Rows.Concat(_resources.ItemLotParamMap.Rows)) {
-            Param.Column[] itemIds = row.Cells.Take(Const.ItemLots).ToArray();
-            Param.Column[] categories = row.Cells.Skip(Const.CategoriesStart).Take(Const.ItemLots).ToArray();
+            Param.Column[] itemIds = row.Columns.Take(Const.ItemLots).ToArray();
+            Param.Column[] categories = row.Columns.Skip(Const.CategoriesStart).Take(Const.ItemLots).ToArray();
             for (int i = 0; i < Const.ItemLots; i++) {
                 int category = (int)categories[i].GetValue(row);
                 if (category != Const.ItemLotGoodsCategory) {

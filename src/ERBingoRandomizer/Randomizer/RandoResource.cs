@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using static ERBingoRandomizer.Params.EquipParamWeapon;
+using Kernel32 = ERBingoRandomizer.Utility.Kernel32;
 
 namespace ERBingoRandomizer.Randomizer; 
 
