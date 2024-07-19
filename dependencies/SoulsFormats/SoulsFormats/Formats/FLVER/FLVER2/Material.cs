@@ -16,9 +16,14 @@ namespace SoulsFormats
             public string Name { get; set; }
 
             /// <summary>
-            /// Virtual path to an MTD file or a Matxml file in games since ER.
+            /// Virtual path to an MTD file.
             /// </summary>
             public string MTD { get; set; }
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
+            public int Flags { get; set; }
 
             /// <summary>
             /// Textures used by this material.
@@ -32,9 +37,9 @@ namespace SoulsFormats
             public int GXIndex { get; set; }
 
             /// <summary>
-            /// Index of the material in the material list. Used since Sekiro during cutscenes. 
+            /// Unknown; only used in Sekiro.
             /// </summary>
-            public int Index { get; set; }
+            public int Unk18 { get; set; }
 
             private int textureIndex, textureCount;
 
@@ -49,6 +54,11 @@ namespace SoulsFormats
                 GXIndex = -1;
             }
 
+            public Material Clone()
+            {
+                return (Material)MemberwiseClone();
+            }
+
             /// <summary>
             /// Creates a new Material with the given values and an empty texture list.
             /// </summary>
@@ -56,39 +66,21 @@ namespace SoulsFormats
             {
                 Name = name;
                 MTD = mtd;
+                Flags = flags;
                 Textures = new List<Texture>();
                 GXIndex = -1;
-                Index = 0;
+                Unk18 = 0;
             }
 
-            /// <summary>
-            /// Calculates the total number of bytes in the utf-16 null-terminated strings owned by this material
-            /// </summary>
-            private int CalculateNumStringBytes()
-            {
-                int numStringBytes = Name.Length + 1;
-                numStringBytes += MTD.Length + 1;
-                foreach (Texture texture in Textures)
-                {
-                    numStringBytes += texture.Type.Length + 1;
-                    numStringBytes += texture.Path.Length + 1;
-                }
-                
-                // 2-bytes per character
-                numStringBytes *= 2;
-                return numStringBytes;
-            }
-
-            internal Material(BinaryReaderEx br, FLVERHeader header, List<GXList> gxLists, Dictionary<int, int> gxListIndices)
+            internal Material(BinaryReaderEx br, FLVER2Header header, List<GXList> gxLists, Dictionary<int, int> gxListIndices)
             {
                 int nameOffset = br.ReadInt32();
                 int mtdOffset = br.ReadInt32();
                 textureCount = br.ReadInt32();
                 textureIndex = br.ReadInt32();
-                // result of CalculateNumStringBytes
-                br.ReadInt32();
+                Flags = br.ReadInt32();
                 int gxOffset = br.ReadInt32();
-                Index = br.ReadInt32();
+                Unk18 = br.ReadInt32();
                 br.AssertInt32(0);
 
                 if (header.Unicode)
@@ -119,7 +111,6 @@ namespace SoulsFormats
                     }
                     GXIndex = gxListIndices[gxOffset];
                 }
-                
             }
 
             internal void TakeTextures(Dictionary<int, Texture> textureDict)
@@ -144,9 +135,9 @@ namespace SoulsFormats
                 bw.ReserveInt32($"MaterialMTD{index}");
                 bw.WriteInt32(Textures.Count);
                 bw.ReserveInt32($"TextureIndex{index}");
-                bw.WriteInt32(CalculateNumStringBytes());
+                bw.WriteInt32(Flags);
                 bw.ReserveInt32($"GXOffset{index}");
-                bw.WriteInt32(Index);
+                bw.WriteInt32(Unk18);
                 bw.WriteInt32(0);
             }
 
@@ -165,7 +156,7 @@ namespace SoulsFormats
                     Textures[i].Write(bw, textureIndex + i);
             }
 
-            internal void WriteStrings(BinaryWriterEx bw, FLVERHeader header, int index)
+            internal void WriteStrings(BinaryWriterEx bw, FLVER2Header header, int index)
             {
                 bw.FillInt32($"MaterialName{index}", (int)bw.Position);
                 if (header.Unicode)

@@ -181,14 +181,18 @@ namespace SoulsFormats
             /// <summary>
             /// The name of a part the event is attached to.
             /// </summary>
+            [MSBReference(ReferenceType = typeof(Part))]
             public string PartName { get; set; }
-            private int PartIndex;
+            [IndexProperty]
+            public int PartIndex { get; set; }
 
             /// <summary>
             /// The name of a region the event is attached to.
             /// </summary>
+            [MSBReference(ReferenceType = typeof(Region))]
             public string PointName { get; set; }
-            private int PointIndex;
+            [IndexProperty]
+            public int PointIndex { get; set; }
 
             /// <summary>
             /// Used to identify the event in event scripts.
@@ -285,8 +289,8 @@ namespace SoulsFormats
 
             internal virtual void GetIndices(MSB3 msb, Entries entries)
             {
-                PartIndex = MSB.FindIndex(entries.Parts, PartName);
-                PointIndex = MSB.FindIndex(entries.Regions, PointName);
+                PartIndex = MSB.FindIndex(this, entries.Parts, PartName);
+                PointIndex = MSB.FindIndex(this, entries.Regions, PointName);
             }
 
             /// <summary>
@@ -307,17 +311,21 @@ namespace SoulsFormats
                 /// <summary>
                 /// The part the treasure is attached to.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Part))]
                 public string TreasurePartName { get; set; }
-                private int TreasurePartIndex;
+                [IndexProperty]
+                public int TreasurePartIndex { get; set; }
 
                 /// <summary>
                 /// First item lot given by this treasure.
                 /// </summary>
+                [MSBParamReference(ParamName = "ItemLotParam")]
                 public int ItemLot1 { get; set; }
 
                 /// <summary>
                 /// Second item lot given by this treasure; rarely used.
                 /// </summary>
+                [MSBParamReference(ParamName = "ItemLotParam")]
                 public int ItemLot2 { get; set; }
 
                 /// <summary>
@@ -328,6 +336,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// If not -1, uses an entry from ActionButtonParam for the pickup prompt.
                 /// </summary>
+                [MSBParamReference(ParamName = "ActionButtonParam")]
                 public int ActionButtonParamID { get; set; }
 
                 /// <summary>
@@ -426,7 +435,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB3 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    TreasurePartIndex = MSB.FindIndex(entries.Parts, TreasurePartName);
+                    TreasurePartIndex = MSB.FindIndex(this, entries.Parts, TreasurePartName);
                 }
             }
 
@@ -475,14 +484,16 @@ namespace SoulsFormats
                 /// <summary>
                 /// Regions that enemies can be spawned at.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Region))]
                 public string[] SpawnPointNames { get; private set; }
-                private int[] SpawnPointIndices;
+                public int[] SpawnPointIndices;
 
                 /// <summary>
                 /// Enemies spawned by this generator.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Part))]
                 public string[] SpawnPartNames { get; private set; }
-                private int[] SpawnPartIndices;
+                public int[] SpawnPartIndices;
 
                 /// <summary>
                 /// Unknown.
@@ -599,8 +610,8 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB3 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    SpawnPointIndices = MSB.FindIndices(entries.Regions, SpawnPointNames);
-                    SpawnPartIndices = MSB.FindIndices(entries.Parts, SpawnPartNames);
+                    SpawnPointIndices = MSB.FindIndices(this, entries.Regions, SpawnPointNames);
+                    SpawnPartIndices = MSB.FindIndices(this, entries.Parts, SpawnPartNames);
                 }
             }
 
@@ -628,23 +639,27 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [MSBEntityReference]
                 public int ObjActEntityID { get; set; }
 
                 /// <summary>
                 /// The object which is being interacted with.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Part))]
                 public string ObjActPartName { get; set; }
-                private int ObjActPartIndex;
+                [IndexProperty]
+                public int ObjActPartIndex { get; set; }
 
                 /// <summary>
                 /// ID in ObjActParam that configures this ObjAct.
                 /// </summary>
+                [MSBParamReference(ParamName = "ObjActParam")]
                 public int ObjActParamID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public ObjActState ObjActStateType { get; set; }
+                public ObjActState ObjActStateType { get; set; } = ObjActState.OneState;
 
                 /// <summary>
                 /// Unknown.
@@ -705,7 +720,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB3 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    ObjActPartIndex = MSB.FindIndex(entries.Parts, ObjActPartName);
+                    ObjActPartIndex = MSB.FindIndex(this, entries.Parts, ObjActPartName);
                 }
             }
 
@@ -719,12 +734,13 @@ namespace SoulsFormats
                 /// <summary>
                 /// Position of the map offset.
                 /// </summary>
+                [PositionProperty]
                 public Vector3 Position { get; set; }
 
                 /// <summary>
                 /// Rotation of the map offset.
                 /// </summary>
-                public float Degree { get; set; }
+                public float RotationY { get; set; }
 
                 /// <summary>
                 /// Creates a MapOffset with default values.
@@ -736,13 +752,13 @@ namespace SoulsFormats
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
                     Position = br.ReadVector3();
-                    Degree = br.ReadSingle();
+                    RotationY = br.ReadSingle();
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
                     bw.WriteVector3(Position);
-                    bw.WriteSingle(Degree);
+                    bw.WriteSingle(RotationY);
                 }
             }
 
@@ -751,15 +767,40 @@ namespace SoulsFormats
             /// </summary>
             public class PseudoMultiplayer : Event
             {
+                /// <summary>
+                /// Determines character type (which determines victory conditions) the player will use in pseudo world.
+                /// </summary>
+                public enum PseudoPlayerChrType : byte
+                {
+                    #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+                    WhitePhantom = 0,
+                    RedPhantom = 1
+                    #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+                }
+                /// <summary>
+                /// Determines which set of FMG entries to use in pseudo world for arrival/failure/success messages.
+                /// </summary>
+                public enum PseudoMessageSetType : byte
+                {
+                    #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+                    Default = 0,
+                    Sirris_Creighton = 1,
+                    Sirris_Hodrick = 2,
+                    Leonhard = 3,
+                    Anri = 4
+                    #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+                }
+
                 private protected override EventType Type => EventType.PseudoMultiplayer;
 
                 /// <summary>
                 /// The NPC whose world you're entering.
                 /// </summary>
+                [MSBEntityReference]
                 public int HostEntityID { get; set; }
 
                 /// <summary>
-                /// Set when inside the event's region, unset when outside it.
+                /// Event flag set while the player is within a pseudo world. Unset when the player leaves.
                 /// </summary>
                 public int EventFlagID { get; set; }
 
@@ -769,24 +810,30 @@ namespace SoulsFormats
                 public int ActivateGoodsID { get; set; }
 
                 /// <summary>
-                /// Unknown; possibly a sound ID.
+                /// Ceremony Param ID to use.
                 /// </summary>
-                public int UnkT0C { get; set; }
+                [MSBParamReference(ParamName = "Ceremony")]
+                public int CeremonyParamID { get; set; }
 
                 /// <summary>
-                /// Unknown; possibly a map event ID.
+                /// Region player will spawn at in pseudo world.
                 /// </summary>
-                public int UnkT10 { get; set; }
+                public int SpawnRegionEntityID { get; set; }
 
                 /// <summary>
-                /// Unknown; possibly flags.
+                /// Player type to use while in pseudo world. 
                 /// </summary>
-                public int UnkT14 { get; set; }
+                public PseudoPlayerChrType PlayerChrType { get; set; } = PseudoPlayerChrType.WhitePhantom;
 
                 /// <summary>
-                /// Unknown.
+                /// Determines which set of FMG entries to use in pseudo world.
                 /// </summary>
-                public int UnkT18 { get; set; }
+                public PseudoMessageSetType MessageSetType { get; set; } = PseudoMessageSetType.Default;
+
+                /// <summary>
+                /// ID of FMG entry to display when trying to join pseudo world.
+                /// </summary>
+                public int JoinMessageTextID { get; set; }
 
                 /// <summary>
                 /// Creates a new PseudoMultiplayer with the given name.
@@ -796,8 +843,8 @@ namespace SoulsFormats
                     HostEntityID = -1;
                     EventFlagID = -1;
                     ActivateGoodsID = -1;
-                    UnkT0C = -1;
-                    UnkT10 = -1;
+                    CeremonyParamID = -1;
+                    SpawnRegionEntityID = -1;
                 }
 
                 internal PseudoMultiplayer(BinaryReaderEx br) : base(br) { }
@@ -807,10 +854,13 @@ namespace SoulsFormats
                     HostEntityID = br.ReadInt32();
                     EventFlagID = br.ReadInt32();
                     ActivateGoodsID = br.ReadInt32();
-                    UnkT0C = br.ReadInt32();
-                    UnkT10 = br.ReadInt32();
-                    UnkT14 = br.ReadInt32();
-                    UnkT18 = br.ReadInt32();
+                    CeremonyParamID = br.ReadInt32();
+                    SpawnRegionEntityID = br.ReadInt32();
+                    PlayerChrType = br.ReadEnum8<PseudoPlayerChrType>();
+                    MessageSetType = br.ReadEnum8<PseudoMessageSetType>();
+                    br.ReadByte(); // Not an assert to prevent making old modded maps inaccessible.
+                    br.ReadByte(); // Not an assert to prevent making old modded maps inaccessible.
+                    JoinMessageTextID = br.ReadInt32();
                     br.AssertInt32(0);
                 }
 
@@ -819,10 +869,13 @@ namespace SoulsFormats
                     bw.WriteInt32(HostEntityID);
                     bw.WriteInt32(EventFlagID);
                     bw.WriteInt32(ActivateGoodsID);
-                    bw.WriteInt32(UnkT0C);
-                    bw.WriteInt32(UnkT10);
-                    bw.WriteInt32(UnkT14);
-                    bw.WriteInt32(UnkT18);
+                    bw.WriteInt32(CeremonyParamID);
+                    bw.WriteInt32(SpawnRegionEntityID);
+                    bw.WriteByte((byte)PlayerChrType);
+                    bw.WriteByte((byte)MessageSetType);
+                    bw.WriteByte(0);
+                    bw.WriteByte(0);
+                    bw.WriteInt32(JoinMessageTextID);
                     bw.WriteInt32(0);
                 }
             }
@@ -837,13 +890,15 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown; probably some kind of route type.
                 /// </summary>
-                public int UnkT00 { get; set; }
+                [MSBEnum(EnumType = "PATROL_TYPE")]
+                public int PatrolType { get; set; }
 
                 /// <summary>
                 /// List of points in the route.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Region))]
                 public string[] WalkPointNames { get; private set; }
-                private short[] WalkPointIndices;
+                public short[] WalkPointIndices;
 
                 /// <summary>
                 /// Creates a PatrolInfo with default values.
@@ -863,7 +918,7 @@ namespace SoulsFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    UnkT00 = br.AssertInt32(0, 1, 2, 5);
+                    PatrolType = br.AssertInt32([0, 1, 2, 5]);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -872,7 +927,7 @@ namespace SoulsFormats
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteInt32(UnkT00);
+                    bw.WriteInt32(PatrolType);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
@@ -892,7 +947,7 @@ namespace SoulsFormats
                     base.GetIndices(msb, entries);
                     WalkPointIndices = new short[WalkPointNames.Length];
                     for (int i = 0; i < WalkPointNames.Length; i++)
-                        WalkPointIndices[i] = (short)MSB.FindIndex(entries.Regions, WalkPointNames[i]);
+                        WalkPointIndices[i] = (short)MSB.FindIndex(this, entries.Regions, WalkPointNames[i]);
                 }
             }
 
@@ -916,8 +971,9 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Part))]
                 public string[] GroupPartsNames { get; private set; }
-                private int[] GroupPartsIndices;
+                public int[] GroupPartsIndices;
 
                 /// <summary>
                 /// Creates a PlatoonInfo with default values.
@@ -962,7 +1018,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB3 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    GroupPartsIndices = MSB.FindIndices(entries.Parts, GroupPartsNames);
+                    GroupPartsIndices = MSB.FindIndices(this, entries.Parts, GroupPartsNames);
                 }
             }
 

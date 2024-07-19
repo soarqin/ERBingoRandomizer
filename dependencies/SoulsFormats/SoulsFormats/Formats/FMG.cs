@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace SoulsFormats
@@ -12,24 +11,24 @@ namespace SoulsFormats
         /// <summary>
         /// The strings contained in this FMG.
         /// </summary>
-        public List<Entry> Entries;
+        public SortedList<int, string> Entries  { get; set; }
 
         /// <summary>
         /// Indicates file format; 0 - DeS, 1 - DS1/DS2, 2 - DS3/BB.
         /// </summary>
-        public FMGVersion Version;
+        public FMGVersion Version  { get; set; }
 
         /// <summary>
         /// FMG file endianness. (Big = true)
         /// </summary>
-        public bool BigEndian;
+        public bool BigEndian  { get; set; }
 
         /// <summary>
         /// Creates an empty FMG configured for DS1/DS2.
         /// </summary>
         public FMG()
         {
-            Entries = new List<Entry>();
+            Entries = new SortedList<int, string>();
             Version = FMGVersion.DarkSouls1;
             BigEndian = false;
         }
@@ -39,7 +38,7 @@ namespace SoulsFormats
         /// </summary>
         public FMG(FMGVersion version)
         {
-            Entries = new List<Entry>();
+            Entries = new SortedList<int, string>();
             Version = version;
             BigEndian = Version == FMGVersion.DemonsSouls;
         }
@@ -79,7 +78,7 @@ namespace SoulsFormats
             else
                 br.AssertInt32(0);
 
-            Entries = new List<Entry>(groupCount);
+            Entries = new SortedList<int, string>();
             for (int i = 0; i < groupCount; i++)
             {
                 int offsetIndex = br.ReadInt32();
@@ -101,7 +100,7 @@ namespace SoulsFormats
 
                         int id = firstID + j;
                         string text = stringOffset != 0 ? br.GetUTF16(stringOffset) : null;
-                        Entries.Add(new Entry(id, text));
+                        Entries.Add(id, text);
                     }
                 }
                 br.StepOut();
@@ -143,14 +142,14 @@ namespace SoulsFormats
                 bw.WriteInt32(0);
 
             int groupCount = 0;
-            Entries.Sort((e1, e2) => e1.ID.CompareTo(e2.ID));
             for (int i = 0; i < Entries.Count; i++)
             {
                 bw.WriteInt32(i);
-                bw.WriteInt32(Entries[i].ID);
-                while (i < Entries.Count - 1 && Entries[i + 1].ID == Entries[i].ID + 1)
+                var id = Entries.GetKeyAtIndex(i);
+                bw.WriteInt32(id);
+                while (i < Entries.Count - 1 && Entries.GetKeyAtIndex(i + 1) == id + 1)
                     i++;
-                bw.WriteInt32(Entries[i].ID);
+                bw.WriteInt32(Entries.GetKeyAtIndex(i));
 
                 if (wide)
                     bw.WriteInt32(0);
@@ -174,7 +173,7 @@ namespace SoulsFormats
 
             for (int i = 0; i < Entries.Count; i++)
             {
-                string text = Entries[i].Text;
+                string text = Entries.GetValueAtIndex(i);
 
                 if (wide)
                     bw.FillInt64($"StringOffset{i}", text == null ? 0 : bw.Position);
@@ -182,7 +181,7 @@ namespace SoulsFormats
                     bw.FillInt32($"StringOffset{i}", text == null ? 0 : (int)bw.Position);
 
                 if (text != null)
-                    bw.WriteUTF16(Entries[i].Text, true);
+                    bw.WriteUTF16(text, true);
             }
 
             bw.FillInt32("FileSize", (int)bw.Position);
@@ -193,14 +192,14 @@ namespace SoulsFormats
         /// </summary>
         public string this[int id]
         {
-            get => Entries.Find(entry => entry.ID == id)?.Text;
+            get => Entries.GetValueOrDefault(id);
 
             set
             {
-                if (Entries.Any(entry => entry.ID == id))
-                    Entries.Find(entry => entry.ID == id).Text = value;
+                if (value == null)
+                    Entries.Remove(id);
                 else
-                    Entries.Add(new Entry(id, value));
+                    Entries[id] = value;
             }
         }
 
@@ -212,12 +211,12 @@ namespace SoulsFormats
             /// <summary>
             /// The ID of this entry.
             /// </summary>
-            public int ID;
+            public int ID { get; set; }
 
             /// <summary>
             /// The text of this entry.
             /// </summary>
-            public string Text;
+            public string Text { get; set; }
 
             /// <summary>
             /// Creates a new entry with the specified ID and text.

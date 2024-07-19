@@ -20,11 +20,11 @@ namespace SoulsFormats
     }
 
     /// <summary>
-    ///     Properties with this attribute are not used as a reference
+    ///     Properties with this attribute are not used as a renference
     ///     to obtain render groups from.
     /// </summary>
     [System.AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class NoRenderGroupInheritance : Attribute
+    public class NoRenderGroupInheritence : Attribute
     {
     }
 }

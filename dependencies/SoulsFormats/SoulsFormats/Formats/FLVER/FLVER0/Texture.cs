@@ -9,11 +9,6 @@
 
             public string Path { get; set; }
 
-            public Texture()
-            {
-
-            }
-
             internal Texture(BinaryReaderEx br, bool useUnicode)
             {
                 int pathOffset = br.ReadInt32();

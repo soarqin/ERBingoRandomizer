@@ -6,45 +6,42 @@ using static SoulsFormats.DDS;
 namespace SoulsFormats
 {
     /* Known TPF texture formats
-  0 - DXT1
-  1 - DXT1
-  3 - DXT3
-  5 - DXT5
-  6 - B5G5R5A1_UNORM
-  9 - B8G8R8A8
- 10 - R8G8B8 on PC, A8G8B8R8 on PS3
- 16 - A8
- 22 - A16B16G16R16f
- 23 - DXT5
- 24 - DXT1
- 25 - DXT1
- 33 - DXT5
-100 - BC6H_UF16
-102 - BC7_UNORM
-103 - ATI1
-104 - ATI2
-105 - A8B8G8R8
-106 - BC7_UNORM
-107 - BC7_UNORM
-108 - DXT1
-109 - DXT1
-110 - DXT5
-112 - BC7_UNORM_SRGB
-113 - BC6H_UF16
-*/
+      0 - DXT1
+      1 - DXT1
+      3 - DXT3
+      5 - DXT5
+      6 - B5G5R5A1_UNORM
+      9 - B8G8R8A8
+     10 - R8G8B8 on PC, A8G8B8R8 on PS3
+     16 - A8
+     22 - A16B16G16R16f
+     23 - DXT5
+     24 - DXT1
+     25 - DXT1
+     33 - DXT5
+    100 - BC6H_UF16
+    102 - BC7_UNORM
+    103 - ATI1
+    104 - ATI2
+    105 - A8B8G8R8
+    106 - BC7_UNORM
+    107 - BC7_UNORM
+    108 - DXT1
+    109 - DXT1
+    110 - DXT5
+    112 - BC7_UNORM_SRGB
+    113 - BC6H_UF16
+    */
 
-/* BCn block sizes
-BC1 (DXT1) - 8
-BC2 (DXT3) - 16
-BC3 (DXT5) - 16
-BC4 (ATI1) - 8
-BC5 (ATI2) - 16
-BC6 - 16
-BC7 - 16
-*/
-
-// Source: TK SoulsFormats
-// TKSF Headerizer, but included here to be accesses from the DSMS TPF.
+    /* BCn block sizes
+    BC1 (DXT1) - 8
+    BC2 (DXT3) - 16
+    BC3 (DXT5) - 16
+    BC4 (ATI1) - 8
+    BC5 (ATI2) - 16
+    BC6 - 16
+    BC7 - 16
+    */
     internal static class Headerizer
     {
         private static Dictionary<byte, int> CompressedBPB = new Dictionary<byte, int>
@@ -100,9 +97,9 @@ BC7 - 16
 
         private static byte[] DX10Formats = { 6, 100, 102, 106, 107, 112, 113 };
 
-        public static byte[] Headerize(TPF.Texture texture)
+        public static Memory<byte> Headerize(TPF.Texture texture)
         {
-            if (SFEncoding.ASCII.GetString(texture.Bytes, 0, 4) == "DDS ")
+            if (SFEncoding.ASCII.GetString(texture.Bytes.Span[..4].ToArray(), 0, 4) == "DDS ")
                 return texture.Bytes;
 
             var dds = new DDS();
@@ -145,8 +142,8 @@ BC7 - 16
                 dds.dwCaps2 = DDSCAPS2.VOLUME;
 
             PIXELFORMAT ddspf = dds.ddspf;
-            var dxFormats = DX10Formats.ToList();
-            if (FourCC.ContainsKey(format) || dxFormats.Contains(format))
+
+            if (FourCC.ContainsKey(format) || DX10Formats.Contains(format))
                 ddspf.dwFlags = DDPF.FOURCC;
             if (format == 6)
                 ddspf.dwFlags |= DDPF.ALPHAPIXELS | DDPF.RGB;
@@ -161,7 +158,7 @@ BC7 - 16
 
             if (FourCC.ContainsKey(format))
                 ddspf.dwFourCC = FourCC[format];
-            else if (dxFormats.Contains(format))
+            else if (DX10Formats.Contains(format))
                 ddspf.dwFourCC = "DX10";
 
             if (format == 6)
@@ -209,8 +206,8 @@ BC7 - 16
                     dds.header10.miscFlag = RESOURCE_MISC.TEXTURECUBE;
             }
 
-            byte[] bytes = RebuildPixelData(texture.Bytes, format, width, height, mipCount, type);
-            return dds.Write(bytes);
+            var bytes = RebuildPixelData(texture.Bytes, format, width, height, mipCount, type);
+            return dds.Write(bytes.Span);
         }
 
         private static int DetermineMipCount(int width, int height)
@@ -218,7 +215,7 @@ BC7 - 16
             return (int)Math.Ceiling(Math.Log(Math.Max(width, height), 2)) + 1;
         }
 
-        private static byte[] RebuildPixelData(byte[] bytes, byte format, short width, short height, int mipCount, TPF.TexType type)
+        private static Memory<byte> RebuildPixelData(Memory<byte> bytes, byte format, short width, short height, int mipCount, TPF.TexType type)
         {
             int imageCount = type == TPF.TexType.Cubemap ? 6 : 1;
             int padDimensions = 1;
@@ -226,10 +223,10 @@ BC7 - 16
                 padDimensions = 32;
 
             List<Image> images;
-            if (CompressedBPB.ContainsKey(format))
-                images = Image.ReadCompressed(bytes, width, height, padDimensions, imageCount, mipCount, 0x80, CompressedBPB[format]);
-            else if (UncompressedBPP.ContainsKey(format))
-                images = Image.ReadUncompressed(bytes, width, height, padDimensions, imageCount, mipCount, 0x80, UncompressedBPP[format]);
+            if (CompressedBPB.TryGetValue(format, out var value))
+                images = Image.ReadCompressed(bytes, width, height, padDimensions, imageCount, mipCount, 0x80, value);
+            else if (UncompressedBPP.TryGetValue(format, out var value1))
+                images = Image.ReadUncompressed(bytes, width, height, padDimensions, imageCount, mipCount, 0x80, value1);
             else
                 throw new NotSupportedException($"Cannot decompose format {format}.");
 
@@ -385,12 +382,12 @@ BC7 - 16
             {
                 var bw = new BinaryWriterEx(false);
                 foreach (Image image in images)
-                foreach (byte[] mip in image.MipLevels)
-                    bw.WriteBytes(mip);
+                    foreach (byte[] mip in image.MipLevels)
+                        bw.WriteBytes(mip);
                 return bw.FinishBytes();
             }
 
-            public static List<Image> ReadUncompressed(byte[] bytes, int width, int height, int padDimensions, int imageCount, int mipCount, int padBetween, int bytesPerPixel)
+            public static List<Image> ReadUncompressed(Memory<byte> bytes, int width, int height, int padDimensions, int imageCount, int mipCount, int padBetween, int bytesPerPixel)
             {
                 var images = new List<Image>(imageCount);
                 var br = new BinaryReaderEx(false, bytes);
@@ -410,7 +407,7 @@ BC7 - 16
                 return images;
             }
 
-            public static List<Image> ReadCompressed(byte[] bytes, int width, int height, int padDimensions, int imageCount, int mipCount, int padBetween, int bytesPerBlock)
+            public static List<Image> ReadCompressed(Memory<byte> bytes, int width, int height, int padDimensions, int imageCount, int mipCount, int padBetween, int bytesPerBlock)
             {
                 var images = new List<Image>(imageCount);
                 var br = new BinaryReaderEx(false, bytes);

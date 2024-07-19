@@ -61,14 +61,8 @@ public class BHD5Reader {
             File.WriteAllBytes($"{Data0CachePath}.bhd", bhdBytes[0]);
         }
     }
-    // This is for cached decrypted BHD5s.
-    private static BHD5 readBHD5(string path) {
-        using FileStream fs = new(path, FileMode.Open);
-        return BHD5.Read(fs, BHD5.Game.EldenRing);
-    }
     private static BHD5 readBHD5(byte[] bytes) {
-        using MemoryStream fs = new(bytes);
-        return BHD5.Read(fs, BHD5.Game.EldenRing);
+        return BHD5.Read(bytes, BHD5.Game.EldenRing);
     }
     // Right now just works for data0, as that is where all of the files we need, are, and none of the other header files are being loaded, as it takes a while to decrypt them.    
     public byte[]? GetFile(string filePath) {

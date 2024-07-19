@@ -188,11 +188,13 @@ namespace SoulsFormats
             /// <summary>
             /// Location of the region.
             /// </summary>
+            [PositionProperty]
             public Vector3 Position { get; set; }
 
             /// <summary>
             /// Rotation of the region, in degrees.
             /// </summary>
+            [RotationProperty]
             public Vector3 Rotation { get; set; }
 
             private protected Region(string name)
@@ -655,7 +657,8 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public int UnkT00 { get; set; }
+                [MSBParamReference(ParamName = "MapVolumeFogParam")]
+                public int MapVolumeFogParamID { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -671,7 +674,7 @@ namespace SoulsFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    UnkT00 = br.ReadInt32();
+                    MapVolumeFogParamID = br.ReadInt32();
                     UnkT04 = br.ReadInt32();
                     br.AssertPattern(0x18, 0x00);
                     if (br.VarintLong)
@@ -680,7 +683,7 @@ namespace SoulsFormats
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteInt32(UnkT00);
+                    bw.WriteInt32(MapVolumeFogParamID);
                     bw.WriteInt32(UnkT04);
                     bw.WritePattern(0x18, 0x00);
                     if (bw.VarintLong)

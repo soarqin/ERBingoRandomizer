@@ -6,7 +6,7 @@
         xmlns:viewModels="clr-namespace:ERBingoRandomizer.ViewModels"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d" ResizeMode="NoResize"
-        Title="Bingo Randomizer" Height="450" Width="600" Background="DimGray">
+        Title="Bingo Mod" Height="450" Width="600" Background="DimGray">
     <Window.DataContext>
         <viewModels:MainWindowViewModel x:Name="MainWindowViewModel" />
     </Window.DataContext>
@@ -26,6 +26,7 @@
                 <TextBox Width="420" Text="{Binding Path, UpdateSourceTrigger=PropertyChanged}"
                          VerticalContentAlignment="Center" FontSize="13" FontWeight="Bold" />
             </StackPanel>
+            <!--
             <Separator Height="0" Margin="0,20,0,0" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Label Width="120" HorizontalContentAlignment="Right" Content="输入种子：" HorizontalAlignment="Center"
@@ -33,6 +34,7 @@
                 <TextBox Margin="0, 0, 220, 0" Width="200" Text="{Binding Seed, UpdateSourceTrigger=PropertyChanged}"
                          VerticalContentAlignment="Center" FontSize="13" FontWeight="Bold" />
             </StackPanel>
+        -->
         </StackPanel>
         <StackPanel Grid.Row="1">
             <Separator Margin="0,10,0,10" />
@@ -40,13 +42,15 @@
                 <Label Width="120" HorizontalContentAlignment="Right" Content="规则：" HorizontalAlignment="Center"
                        FontWeight="UltraBlack" />
                 <StackPanel Orientation="Vertical">
+                    <!--
                     <CheckBox Margin="0,5,0,0" Width="280" Content="随机初始职业" VerticalAlignment="Center"
                               IsChecked="{Binding RandomStartupClasses, Mode=TwoWay}"
                               FontSize="13" FontWeight="Medium" />
                     <CheckBox Width="280" Content="随机武器" VerticalAlignment="Center"
                               IsChecked="{Binding RandomWeapons, Mode=TwoWay}"
                               FontSize="13" FontWeight="Medium" />
-                    <CheckBox Width="280" Content="获取灵马后开放赐福" VerticalAlignment="Center"
+                    -->
+                    <CheckBox Width="280" Content="DLC Bingo规则" VerticalAlignment="Center"
                               IsChecked="{Binding OpenGraces, Mode=TwoWay}"
                               FontSize="13" FontWeight="Medium" />
                     <CheckBox Width="280" Content="降低非失色升级材料需求" VerticalAlignment="Center"
@@ -60,9 +64,6 @@
                                  IsChecked="{Binding IsReduceUpgradeMatType1, Mode=TwoWay}"
                                  IsEnabled="{Binding ReduceUpgradeMat}"
                                  FontSize="13" FontWeight="Medium" />
-                    <CheckBox Width="280" Content="随机掉落装备的概率提升到50%" VerticalAlignment="Center"
-                              IsChecked="{Binding GreaterItemLootChance, Mode=TwoWay}"
-                              FontSize="13" FontWeight="Medium" />
                 </StackPanel>
                 <StackPanel Orientation="Vertical">
                     <Label Content="开局获取道具" />
@@ -651,12 +652,14 @@
         </StackPanel>
         <StackPanel Grid.Row="2">
 
+            <!--
             <Separator Margin="0,10,0,10" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Label Width="120" HorizontalContentAlignment="Right" Content="当前种子:" FontWeight="Medium" />
                 <Label Width="420" Content="{Binding LastSeedText}" FontWeight="Black" Foreground="YellowGreen" />
             </StackPanel>
+            -->
 
             <Separator Height="0" Margin="0,10,0,0" />
 

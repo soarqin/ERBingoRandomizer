@@ -198,16 +198,19 @@ namespace SoulsFormats
             /// <summary>
             /// Location of the part.
             /// </summary>
+            [PositionProperty]
             public Vector3 Position { get; set; }
 
             /// <summary>
             /// Rotation of the part, in degrees.
             /// </summary>
+            [RotationProperty]
             public Vector3 Rotation { get; set; }
 
             /// <summary>
             /// Scale of the part, only meaningful for map pieces and objects.
             /// </summary>
+            [ScaleProperty]
             public Vector3 Scale { get; set; }
 
             /// <summary>
@@ -273,16 +276,6 @@ namespace SoulsFormats
             /// <summary>
             /// Unknown.
             /// </summary>
-            public byte LodParamID { get; set; }
-
-            /// <summary>
-            /// Unknown.
-            /// </summary>
-            public byte UnkE0E { get; set; }
-
-            /// <summary>
-            /// Unknown.
-            /// </summary>
             public byte IsShadowSrc { get; set; }
 
             /// <summary>
@@ -294,6 +287,16 @@ namespace SoulsFormats
             /// Unknown.
             /// </summary>
             public byte IsShadowOnly { get; set; }
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
+            public byte UnkE10 { get; set; }
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
+            public byte UnkE11 { get; set; }
 
             /// <summary>
             /// Unknown.
@@ -394,11 +397,11 @@ namespace SoulsFormats
                 ToneMapID = br.ReadByte();
                 ToneCorrectID = br.ReadByte();
                 LanternID = br.ReadByte();
-                LodParamID = br.ReadByte();
-                UnkE0E = br.ReadByte();
                 IsShadowSrc = br.ReadByte();
                 IsShadowDest = br.ReadByte();
                 IsShadowOnly = br.ReadByte();
+                UnkE10 = br.ReadByte();
+                UnkE11 = br.ReadByte();
                 DrawByReflectCam = br.ReadByte();
                 DrawOnlyReflectCam = br.ReadByte();
                 UseDepthBiasFloat = br.ReadByte();
@@ -456,11 +459,11 @@ namespace SoulsFormats
                 bw.WriteByte(ToneMapID);
                 bw.WriteByte(ToneCorrectID);
                 bw.WriteByte(LanternID);
-                bw.WriteByte(LodParamID);
-                bw.WriteByte(UnkE0E);
                 bw.WriteByte(IsShadowSrc);
                 bw.WriteByte(IsShadowDest);
                 bw.WriteByte(IsShadowOnly);
+                bw.WriteByte(UnkE10);
+                bw.WriteByte(UnkE11);
                 bw.WriteByte(DrawByReflectCam);
                 bw.WriteByte(DrawOnlyReflectCam);
                 bw.WriteByte(UseDepthBiasFloat);
@@ -478,7 +481,7 @@ namespace SoulsFormats
 
             internal virtual void GetIndices(MSBD msb, Entries entries)
             {
-                ModelIndex = MSB.FindIndex(entries.Models, ModelName);
+                ModelIndex = MSB.FindIndex(this, entries.Models, ModelName);
             }
 
             /// <summary>
@@ -640,12 +643,15 @@ namespace SoulsFormats
                 /// <summary>
                 /// Collision that controls loading of the enemy.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Collision))]
+                [NoRenderGroupInheritence()]
                 public string CollisionName { get; set; }
                 private int CollisionIndex;
 
                 /// <summary>
                 /// Regions for the enemy to patrol.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Region))]
                 public string[] MovePointNames { get; private set; }
                 private short[] MovePointIndices;
 
@@ -726,11 +732,11 @@ namespace SoulsFormats
                 internal override void GetIndices(MSBD msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    CollisionIndex = MSB.FindIndex(entries.Parts, CollisionName);
+                    CollisionIndex = MSB.FindIndex(this, entries.Parts, CollisionName);
 
                     MovePointIndices = new short[MovePointNames.Length];
                     for (int i = 0; i < MovePointNames.Length; i++)
-                        MovePointIndices[i] = (short)MSB.FindIndex(entries.Regions, MovePointNames[i]);
+                        MovePointIndices[i] = (short)MSB.FindIndex(this, entries.Regions, MovePointNames[i]);
                 }
             }
 
@@ -1099,6 +1105,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// The collision which will load another map.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Collision))]
                 public string CollisionName { get; set; }
                 private int CollisionIndex;
 
@@ -1148,7 +1155,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSBD msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    CollisionIndex = MSB.FindIndex(msb.Parts.Collisions, CollisionName);
+                    CollisionIndex = MSB.FindIndex(this, msb.Parts.Collisions, CollisionName);
                 }
             }
         }

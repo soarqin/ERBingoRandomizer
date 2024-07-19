@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml.Serialization;
-using SoulsFormats;
 
 namespace SoulsFormats
 {
@@ -22,15 +20,6 @@ namespace SoulsFormats
         /// <summary>
         /// The shape of a map region.
         /// </summary>
-        [
-            XmlInclude(typeof(Composite)),
-            XmlInclude(typeof(Shape.Rectangle)),
-            XmlInclude(typeof(Shape.Box)),
-            XmlInclude(typeof(Shape.Cylinder)),
-            XmlInclude(typeof(Shape.Circle)),
-            XmlInclude(typeof(Shape.Point)),
-            XmlInclude(typeof(Shape.Sphere)),
-        ]
         public abstract class Shape
         {
             internal abstract ShapeType Type { get; }
@@ -349,7 +338,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Other regions referenced by this shape.
                 /// </summary>
-                public Child[] Children { get; set; }
+                public Child[] Children { get; private set; }
 
                 /// <summary>
                 /// Creates a Composite with 8 empty references.
@@ -410,9 +399,10 @@ namespace SoulsFormats
                     private int RegionIndex;
 
                     /// <summary>
-                    /// Unknown.
+                    /// Makes this shape add or subtract the composite region's currently defined shape.
+                    /// 0 = add? 2 = subtract?
                     /// </summary>
-                    public int Unk04 { get; set; }
+                    public int unkShapeSubtractType { get; set; }
 
                     /// <summary>
                     /// Creates a Child with default values.
@@ -422,7 +412,7 @@ namespace SoulsFormats
                     internal Child(BinaryReaderEx br)
                     {
                         RegionIndex = br.ReadInt32();
-                        Unk04 = br.ReadInt32();
+                        unkShapeSubtractType = br.ReadInt32();
                     }
 
                     /// <summary>
@@ -430,13 +420,13 @@ namespace SoulsFormats
                     /// </summary>
                     public Child DeepCopy()
                     {
-                        return new Child() { RegionName = RegionName, Unk04 = Unk04 };
+                        return new Child() { RegionName = RegionName, unkShapeSubtractType = unkShapeSubtractType };
                     }
 
                     internal void Write(BinaryWriterEx bw)
                     {
                         bw.WriteInt32(RegionIndex);
-                        bw.WriteInt32(Unk04);
+                        bw.WriteInt32(unkShapeSubtractType);
                     }
 
                     internal void GetNames<T>(List<T> regions) where T : IMsbRegion

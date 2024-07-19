@@ -10,8 +10,8 @@ public static class Const {
     public const string BingoRegulationPath = $"{BingoPath}/{RegulationName}";
     public const string ExeName = "eldenring.exe";
     public const string RegulationName = "regulation.bin";
-    public const string ItemMsgBNDPath = "/msg/engus/item.msgbnd.dcx";
-    public const string MenuMsgBNDPath = "/msg/engus/menu.msgbnd.dcx";
+    public const string ItemMsgBNDPath = "/msg/engus/item_dlc02.msgbnd.dcx";
+    public const string MenuMsgBNDPath = "/msg/engus/menu_dlc02.msgbnd.dcx";
     public const string CommonEventPath = "/event/common.emevd.dcx";
     // Params  
     public const string EquipMtrlSetParamName = "EquipMtrlSetParam.param";
@@ -28,9 +28,13 @@ public static class Const {
     public const string AtkParamPcName = "AtkParam_Pc.param";
     // FMGS  
     public const string WeaponNameName = "WeaponName.fmg";
+    public const string WeaponNameDlc01Name = "WeaponName_dlc01.fmg";
     public const string ProtectorNameName = "ProtectorName.fmg";
+    public const string ProtectorDlc01NameName = "ProtectorName_dlc01.fmg";
     public const string GoodsNameName = "GoodsName.fmg";
+    public const string GoodsNameDlc01Name = "GoodsName_dlc01.fmg";
     public const string AccessoryNameName = "AccessoryName.fmg";
+    public const string AccessoryNameDlc01Name = "AccessoryName_dlc01.fmg";
     public const string GR_LineHelpName = "GR_LineHelp.fmg";
     public const string GR_MenuTextName = "GR_MenuText.fmg";
     public static readonly string[] ERLanguageNames =

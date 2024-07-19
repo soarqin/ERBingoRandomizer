@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace SoulsFormats
@@ -27,7 +29,10 @@ namespace SoulsFormats
             {
                 LayoutIndex = layoutIndex;
             }
-
+            public VertexBuffer Clone()
+            {
+                return (VertexBuffer)MemberwiseClone();
+            }
             internal VertexBuffer(BinaryReaderEx br)
             {
                 BufferIndex = br.ReadInt32();
@@ -40,11 +45,25 @@ namespace SoulsFormats
                 BufferOffset = br.ReadInt32();
             }
 
-            internal void ReadBuffer(BinaryReaderEx br, List<BufferLayout> layouts, List<FLVER.Vertex> vertices, int dataOffset, FLVERHeader header)
+            internal void ReadBuffer(BinaryReaderEx br, List<BufferLayout> layouts, FLVER.Vertex[] vertices, int count, int dataOffset, FLVER2Header header)
             {
                 BufferLayout layout = layouts[LayoutIndex];
                 if (VertexSize != layout.Size)
-                    throw new InvalidDataException($"Mismatched vertex buffer and buffer layout sizes.");
+                {
+                    //Only try this for DS1
+                    if (header.Version == 0x2000B || header.Version == 0x2000C || header.Version == 0x2000D)
+                    {
+                        if (!layout.DarkSoulsRemasteredFix())
+                        {
+                            throw new InvalidDataException($"Mismatched vertex buffer and buffer layout sizes for Dark Souls Remastered model.");
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidDataException($"Mismatched vertex buffer and buffer layout sizes.");
+                    }
+                }
+
 
                 br.StepIn(dataOffset + BufferOffset);
                 {
@@ -52,7 +71,7 @@ namespace SoulsFormats
                     if (header.Version >= 0x2000F)
                         uvFactor = 2048;
 
-                    for (int i = 0; i < vertices.Count; i++)
+                    for (int i = 0; i < count; i++)
                         vertices[i].Read(br, layout, uvFactor);
                 }
                 br.StepOut();
@@ -63,7 +82,7 @@ namespace SoulsFormats
                 BufferOffset = -1;
             }
 
-            internal void Write(BinaryWriterEx bw, FLVERHeader header, int index, int bufferIndex, List<BufferLayout> layouts, int vertexCount)
+            internal void Write(BinaryWriterEx bw, FLVER2Header header, int index, int bufferIndex, List<BufferLayout> layouts, int vertexCount)
             {
                 BufferLayout layout = layouts[LayoutIndex];
 
@@ -77,7 +96,7 @@ namespace SoulsFormats
                 bw.ReserveInt32($"VertexBufferOffset{index}");
             }
 
-            internal void WriteBuffer(BinaryWriterEx bw, int index, List<BufferLayout> layouts, List<FLVER.Vertex> Vertices, int dataStart, FLVERHeader header)
+            internal void WriteBuffer(BinaryWriterEx bw, int index, List<BufferLayout> layouts, FLVER.Vertex[] Vertices, int dataStart, FLVER2Header header)
             {
                 BufferLayout layout = layouts[LayoutIndex];
                 bw.FillInt32($"VertexBufferOffset{index}", (int)bw.Position - dataStart);
@@ -89,6 +108,7 @@ namespace SoulsFormats
                 foreach (FLVER.Vertex vertex in Vertices)
                     vertex.Write(bw, layout, uvFactor);
             }
+
         }
     }
 }

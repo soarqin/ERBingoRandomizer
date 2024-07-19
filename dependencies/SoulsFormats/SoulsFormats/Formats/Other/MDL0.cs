@@ -12,7 +12,7 @@ namespace SoulsFormats.Other
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public int Unk04;
         public int Unk08;
-        public List<Node> Nodes;
+        public List<Bone> Bones;
         public List<ushort> Indices;
         public List<Vertex> VerticesA;
         public List<Vertex> VerticesB;
@@ -47,9 +47,9 @@ namespace SoulsFormats.Other
             int texturesOffset = br.ReadInt32();
 
             br.Position = bonesOffset;
-            Nodes = new List<Node>(boneCount);
+            Bones = new List<Bone>(boneCount);
             for (int i = 0; i < boneCount; i++)
-                Nodes.Add(new Node(br));
+                Bones.Add(new Bone(br));
 
             br.Position = indicesOffset;
             Indices = new List<ushort>(br.ReadUInt16s(indexCount));
@@ -123,7 +123,7 @@ namespace SoulsFormats.Other
             return triangles;
         }
 
-        public class Node
+        public class Bone
         {
             public Vector3 Translation;
             public Vector3 Rotation;
@@ -137,7 +137,7 @@ namespace SoulsFormats.Other
             public List<MeshGroup> MeshesC;
             public int Unk4C;
 
-            internal Node(BinaryReaderEx br)
+            internal Bone(BinaryReaderEx br)
             {
                 Translation = br.ReadVector3();
                 Rotation = br.ReadVector3();
@@ -217,7 +217,7 @@ namespace SoulsFormats.Other
             internal Mesh(BinaryReaderEx br)
             {
                 MaterialIndex = br.ReadByte();
-                Unk01 = br.AssertByte(0, 1, 2);
+                Unk01 = br.AssertByte([0, 1, 2]);
                 VertexCount = br.ReadInt16();
                 IndexCount = br.ReadInt32();
                 StartVertex = br.ReadInt32();
@@ -233,10 +233,10 @@ namespace SoulsFormats.Other
             public Vector3 Normal;
             public Color Color;
             public Vector2[] UVs;
-            public MDLWeightIndex PrimaryWeightFlag;
-            public MDLWeightIndex SecondaryWeightFlag;
-            public float PrimaryVertexWeight;
-            public float SecondaryVertexWeight;
+            public short UnkShortA;
+            public short UnkShortB;
+            public float UnkFloatA;
+            public float UnkFloatB;
 
             public Vertex(Vector3 position, Vector3 normal)
             {
@@ -248,7 +248,7 @@ namespace SoulsFormats.Other
             internal Vertex(BinaryReaderEx br, VertexFormat format)
             {
                 Position = br.ReadVector3();
-                Normal = br.Read11_11_10Vector3();
+                Normal = Read11_11_10Vector3(br);
                 Color = br.ReadRGBA();
                 UVs = new Vector2[2];
                 for (int i = 0; i < 2; i++)
@@ -256,43 +256,24 @@ namespace SoulsFormats.Other
 
                 if (format >= VertexFormat.B)
                 {
-                    // Both may be 0, 4, 8, 12, etc
-                    PrimaryWeightFlag = br.ReadEnum16<MDLWeightIndex>();
-                    SecondaryWeightFlag = br.ReadEnum16<MDLWeightIndex>();
+                    UnkShortA = br.ReadInt16();
+                    UnkShortB = br.ReadInt16();
                 }
 
                 if (format >= VertexFormat.C)
                 {
-                    PrimaryVertexWeight = br.ReadSingle();
-                    SecondaryVertexWeight = br.ReadSingle();
+                    UnkFloatA = br.ReadSingle();
+                    UnkFloatB = br.ReadSingle();
                 }
             }
 
-            public short GetPrimaryWeightIndex()
+            private static Vector3 Read11_11_10Vector3(BinaryReaderEx br)
             {
-                return GetWeightIndex(PrimaryWeightFlag);
-            }
-
-            public short GetSecondaryWeightIndex()
-            {
-                return GetWeightIndex(SecondaryWeightFlag);
-            }
-
-            private short GetWeightIndex(MDLWeightIndex weightIndex)
-            {
-                switch (weightIndex)
-                {
-                    case MDLWeightIndex.Index0:
-                        return 0;
-                    case MDLWeightIndex.Index1:
-                        return 1;
-                    case MDLWeightIndex.Index2:
-                        return 2;
-                    case MDLWeightIndex.Index3:
-                        return 3;
-                    default:
-                        throw new System.NotImplementedException("Unexpected weight index!");
-                }
+                int vector = br.ReadInt32();
+                int x = vector << 21 >> 21;
+                int y = vector << 10 >> 21;
+                int z = vector << 0 >> 22;
+                return new Vector3(x / (float)0b11_1111_1111, y / (float)0b11_1111_1111, z / (float)0b1_1111_1111);
             }
         }
 

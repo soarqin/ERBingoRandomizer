@@ -107,7 +107,7 @@ public partial class BingoRandomizer {
         setBndFile(_resources.RegulationBnd, Const.AtkParamPcName, _resources.AtkParamPc.Write());
         SFUtil.EncryptERRegulation($"{Const.BingoPath}/{Const.RegulationName}", _resources.RegulationBnd);
         for (var i = 0; i < Const.ERLanguageCount; i++) {
-            var menuMsgBndPath = $"/msg/{Const.ERLanguageNames[i]}/menu.msgbnd.dcx";
+            var menuMsgBndPath = $"/msg/{Const.ERLanguageNames[i]}/menu_dlc02.msgbnd.dcx";
             Directory.CreateDirectory(Path.GetDirectoryName($"{Const.BingoPath}/{menuMsgBndPath}") ?? throw new InvalidOperationException());
             setBndFile(_resources.MenuMsgBnd[i], Const.GR_LineHelpName, _resources.LineHelpFmg[i].Write());
             File.WriteAllBytes($"{Const.BingoPath}/{menuMsgBndPath}", _resources.MenuMsgBnd[i].Write());

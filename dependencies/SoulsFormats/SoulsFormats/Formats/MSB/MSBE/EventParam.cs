@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
-using SoulsFormats;
 
 namespace SoulsFormats
 {
@@ -292,7 +291,7 @@ namespace SoulsFormats
                 EventID = br.ReadInt32();
                 br.AssertUInt32((uint)Type);
                 OtherID = br.ReadInt32(); // ID
-                Unk14 = br.AssertInt32(0, 1);
+                Unk14 = br.AssertInt32([0, 1]);
                 long baseDataOffset = br.ReadInt64();
                 long typeDataOffset = br.ReadInt64();
                 long unk3Offset = br.ReadInt64();

@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using System.Runtime.Serialization;
 using System.Xml.Serialization;
-using SoulsFormats;
 
 namespace SoulsFormats
 {
@@ -1251,7 +1249,7 @@ namespace SoulsFormats
 
                 internal UnkStruct8(BinaryReaderEx br)
                 {
-                    Unk00 = br.AssertInt32(0, 1);
+                    Unk00 = br.AssertInt32([0, 1]);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -1379,7 +1377,7 @@ namespace SoulsFormats
                     Unk04 = br.ReadInt32();
                     br.AssertInt32(0);
                     Unk0C = br.ReadInt32();
-                    Unk10 = br.AssertInt32(0, 1);
+                    Unk10 = br.AssertInt32([0, 1]);
                     CullingHeightBehavior = br.ReadInt32();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -2180,7 +2178,7 @@ namespace SoulsFormats
                     UnkT1C = br.ReadInt32();
                     PlayRegionID = br.ReadInt32();
                     UnkT24 = br.ReadInt16();
-                    UnkT26 = br.AssertInt16(0, 1);
+                    UnkT26 = br.AssertInt16([0, 1]);
                     br.AssertInt32(0);
                     br.AssertInt32(-1);
                     UnkT30 = br.ReadInt32();
@@ -2194,7 +2192,7 @@ namespace SoulsFormats
                     UnkT40 = br.ReadSingle();
                     br.AssertInt32(0);
                     EnableFastTravelEventFlagID = br.ReadUInt32();
-                    UnkT4C = br.AssertInt16(0, 1, 2);
+                    UnkT4C = br.AssertInt16([0, 1, 2]);
                     UnkT4E = br.ReadInt16();
                 }
 
@@ -2406,7 +2404,7 @@ namespace SoulsFormats
                 /// The collision part to attach to.
                 /// </summary>
                 [MSBReference(ReferenceType = typeof(Collision))]
-                [NoRenderGroupInheritance()]
+                [NoRenderGroupInheritence()]
                 public string CollisionName { get; set; }
 
                 [IndexProperty]
@@ -3240,7 +3238,7 @@ namespace SoulsFormats
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
                     UnkT00 = br.ReadInt16();
-                    UnkT02 = br.AssertInt16(0, 1);
+                    UnkT02 = br.AssertInt16([0, 1]);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -3312,7 +3310,7 @@ namespace SoulsFormats
                     bw.WriteInt32(UnkT30);
                     bw.WriteInt32(UnkT34);
                     bw.WriteInt32s(UnkPartIndices);
-                    bw.WriteBoolean(UnkT50);                
+                    bw.WriteBoolean(UnkT50);
                     bw.WriteByte(UnkT51);
                     bw.WriteByte(0);
                     bw.WriteByte(UnkT53);

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using SoulsFormats;
 
 namespace SoulsFormats
 {
@@ -54,7 +53,7 @@ namespace SoulsFormats
                 Unk14 = br.ReadInt32();
                 Unk18 = br.ReadInt32();
                 Unk1C = br.ReadInt32();
-                Unk20 = br.AssertInt32(0, 1);
+                Unk20 = br.AssertInt32([0, 1]);
                 int customDataCount = br.ReadInt32();
                 Unk28 = br.ReadInt32();
                 br.AssertInt32(0);

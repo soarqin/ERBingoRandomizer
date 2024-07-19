@@ -317,11 +317,13 @@ namespace SoulsFormats
             /// <summary>
             /// Center of the region.
             /// </summary>
+            [PositionProperty]
             public Vector3 Position { get; set; }
 
             /// <summary>
             /// Rotation of the region, in degrees.
             /// </summary>
+            [RotationProperty]
             public Vector3 Rotation { get; set; }
 
             /// <summary>
@@ -338,7 +340,8 @@ namespace SoulsFormats
             /// Region is inactive unless this part is drawn; null for always active.
             /// </summary>
             public string ActivationPartName { get; set; }
-            private int ActivationPartIndex;
+            [IndexProperty]
+            public int ActivationPartIndex { get; set; }
 
             /// <summary>
             /// An ID used to identify this region in event scripts.
@@ -507,7 +510,7 @@ namespace SoulsFormats
 
             internal virtual void GetIndices(MSB3 msb, Entries entries)
             {
-                ActivationPartIndex = MSB.FindIndex(entries.Parts, ActivationPartName);
+                ActivationPartIndex = MSB.FindIndex(this, entries.Parts, ActivationPartName);
             }
 
             /// <summary>
@@ -627,7 +630,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Type of sound in this region; determines mixing behavior like muffling.
                 /// </summary>
-                public SndType SoundType { get; set; }
+                public SndType SoundType { get; set; } = SndType.Environment;
 
                 /// <summary>
                 /// ID of the sound to play in this region, or 0 for child regions.
@@ -637,8 +640,9 @@ namespace SoulsFormats
                 /// <summary>
                 /// Names of other Sound regions which extend this one.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Region))]
                 public string[] ChildRegionNames { get; private set; }
-                private int[] ChildRegionIndices;
+                public int[] ChildRegionIndices;
 
                 /// <summary>
                 /// Creates a Sound with default values.
@@ -680,7 +684,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB3 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    ChildRegionIndices = MSB.FindIndices(entries.Regions, ChildRegionNames);
+                    ChildRegionIndices = MSB.FindIndices(this, entries.Regions, ChildRegionNames);
                 }
             }
 
@@ -727,7 +731,7 @@ namespace SoulsFormats
                     br.AssertInt32(-1);
                     br.AssertInt32(-1);
                     br.AssertInt32(-1);
-                    StartDisabled = br.AssertInt32(0, 1) == 1;
+                    StartDisabled = br.AssertInt32([0, 1]) == 1;
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -758,8 +762,10 @@ namespace SoulsFormats
                 /// <summary>
                 /// Name of a corresponding WindArea region.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(WindArea))]
                 public string WindAreaName { get; set; }
-                private int WindAreaIndex;
+                [IndexProperty]
+                public int WindAreaIndex { get; set; }
 
                 /// <summary>
                 /// Creates a WindSFX with default values.
@@ -802,7 +808,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB3 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    WindAreaIndex = MSB.FindIndex(entries.Regions, WindAreaName);
+                    WindAreaIndex = MSB.FindIndex(this, entries.Regions, WindAreaName);
                 }
             }
 
@@ -885,7 +891,7 @@ namespace SoulsFormats
                 {
                     MessageID = br.ReadInt16();
                     UnkT02 = br.ReadInt16();
-                    Hidden = br.AssertInt32(0, 1) == 1;
+                    Hidden = br.AssertInt32([0, 1]) == 1;
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
@@ -1008,14 +1014,14 @@ namespace SoulsFormats
                 private protected override bool DoesHaveTypeData => true;
 
                 /// <summary>
-                /// Unknown.
+                /// Distance from camera required before enabling envmap. 0 = always enabled.
                 /// </summary>
-                public float UnkT00 { get; set; }
+                public float EnableDist { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// Distance it takes for an envmap to fully transition into view.
                 /// </summary>
-                public float Compare { get; set; }
+                public float TransitionDist { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1041,8 +1047,8 @@ namespace SoulsFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    UnkT00 = br.ReadSingle();
-                    Compare = br.ReadSingle();
+                    EnableDist = br.ReadSingle();
+                    TransitionDist = br.ReadSingle();
                     UnkT08 = br.ReadBoolean();
                     UnkT09 = br.ReadByte();
                     UnkT0A = br.ReadInt16();
@@ -1058,8 +1064,8 @@ namespace SoulsFormats
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteSingle(UnkT00);
-                    bw.WriteSingle(Compare);
+                    bw.WriteSingle(EnableDist);
+                    bw.WriteSingle(TransitionDist);
                     bw.WriteBoolean(UnkT08);
                     bw.WriteByte(UnkT09);
                     bw.WriteInt16(UnkT0A);

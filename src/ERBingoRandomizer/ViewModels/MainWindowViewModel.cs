@@ -56,9 +56,9 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
         get => _seed;
         set => SetField(ref _seed, value);
     }
-    public bool RandomStartupClasses { get; set; } = true;
-    public bool RandomWeapons { get; set; } = true;
-    public bool OpenGraces { get; set; } = false;
+    public bool RandomStartupClasses { get; set; } = false;
+    public bool RandomWeapons { get; set; } = false;
+    public bool OpenGraces { get; set; } = true;
 
     private bool _reduceUpgradeMat = false;
     public bool ReduceUpgradeMat
@@ -88,7 +88,6 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
             OnPropertyChanged(nameof(ReduceUpgradeMatType));
         }
     }
-    public bool GreaterItemLootChance { get; set; } = false;
     private string _path = Util.TryGetGameInstallLocation(@"\steamapps\common\ELDEN RING\Game\eldenring.exe") ?? string.Empty;
     public string Path {
         get => _path;
@@ -166,7 +165,6 @@ public class MainWindowViewModel : ViewModelBase, IDisposable {
             OpenGraces = value?.OpenGraces ?? false;
             ReduceUpgradeMat = value?.ReduceUpgradeMat ?? false;
             ReduceUpgradeMatType = value?.ReduceUpgradeMatType ?? 1;
-            GreaterItemLootChance = value?.GreaterItemLootChance ?? false;
             if (SetField(ref _lastSeed, value)) {
                 OnPropertyChanged(nameof(LastSeedText));
             }

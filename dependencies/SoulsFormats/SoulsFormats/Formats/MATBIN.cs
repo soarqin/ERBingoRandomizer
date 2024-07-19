@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Xml.Serialization;
-using SoulsFormats;
 
 namespace SoulsFormats
 {
     /// <summary>
     /// A material config format introduced in Elden Ring. Extension: .matbin
-    /// Source: YabberAvocado
     /// </summary>
     public class MATBIN : SoulsFile<MATBIN>
     {
@@ -131,7 +128,7 @@ namespace SoulsFormats
             Bool = 0,
 
             /// <summary>
-            /// (int) A 32-bit integer.
+            /// (int) A 32-bit integer. 
             /// </summary>
             Int = 4,
 
@@ -169,8 +166,6 @@ namespace SoulsFormats
         /// <summary>
         /// A parameter set per material.
         /// </summary>
-        [XmlInclude(typeof(int[]))]
-        [XmlInclude(typeof(float[]))]
         public class Param
         {
             /// <summary>

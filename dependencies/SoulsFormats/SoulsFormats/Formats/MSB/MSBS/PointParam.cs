@@ -305,11 +305,13 @@ namespace SoulsFormats
             /// <summary>
             /// The location of the region.
             /// </summary>
+            [PositionProperty]
             public Vector3 Position { get; set; }
 
             /// <summary>
             /// The rotiation of the region, in degrees.
             /// </summary>
+            [RotationProperty]
             public Vector3 Rotation { get; set; }
 
             /// <summary>
@@ -336,7 +338,8 @@ namespace SoulsFormats
             /// If specified, the region is only active when the part is loaded.
             /// </summary>
             public string ActivationPartName { get; set; }
-            private int ActivationPartIndex;
+            [IndexProperty]
+            public int ActivationPartIndex { get; set; }
 
             /// <summary>
             /// Identifies the region in event scripts.
@@ -506,7 +509,7 @@ namespace SoulsFormats
 
             internal virtual void GetIndices(Entries entries)
             {
-                ActivationPartIndex = MSB.FindIndex(entries.Parts, ActivationPartName);
+                ActivationPartIndex = MSB.FindIndex(this, entries.Parts, ActivationPartName);
                 if (Shape is MSB.Shape.Composite composite)
                     composite.GetIndices(entries.Regions);
             }
@@ -672,8 +675,9 @@ namespace SoulsFormats
                 /// <summary>
                 /// References to other regions used to build a composite shape.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Region))]
                 public string[] ChildRegionNames { get; private set; }
-                private int[] ChildRegionIndices;
+                public int[] ChildRegionIndices;
 
                 /// <summary>
                 /// Unknown.
@@ -721,7 +725,7 @@ namespace SoulsFormats
                 internal override void GetIndices(Entries entries)
                 {
                     base.GetIndices(entries);
-                    ChildRegionIndices = MSB.FindIndices(entries.Regions, ChildRegionNames);
+                    ChildRegionIndices = MSB.FindIndices(this, entries.Regions, ChildRegionNames);
                 }
             }
 
@@ -792,8 +796,10 @@ namespace SoulsFormats
                 /// <summary>
                 /// Reference to a WindArea region.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Region))]
                 public string WindAreaName { get; set; }
-                private int WindAreaIndex;
+                [IndexProperty]
+                public int WindAreaIndex { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -834,7 +840,7 @@ namespace SoulsFormats
                 internal override void GetIndices(Entries entries)
                 {
                     base.GetIndices(entries);
-                    WindAreaIndex = MSB.FindIndex(entries.Regions, WindAreaName);
+                    WindAreaIndex = MSB.FindIndex(this, entries.Regions, WindAreaName);
                 }
             }
 
@@ -959,14 +965,14 @@ namespace SoulsFormats
                 private protected override bool HasTypeData => true;
 
                 /// <summary>
-                /// Unknown.
+                /// Distance from camera required before enabling envmap. 0 = always enabled.
                 /// </summary>
-                public float UnkT00 { get; set; }
+                public float EnableDist { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// Distance it takes for an envmap to fully transition into view.
                 /// </summary>
-                public float Compare { get; set; }
+                public float TransitionDist { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -1007,8 +1013,8 @@ namespace SoulsFormats
 
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
-                    UnkT00 = br.ReadSingle();
-                    Compare = br.ReadSingle();
+                    EnableDist = br.ReadSingle();
+                    TransitionDist = br.ReadSingle();
                     UnkT08 = br.ReadByte();
                     UnkT09 = br.ReadByte();
                     UnkT0A = br.ReadInt16();
@@ -1021,8 +1027,8 @@ namespace SoulsFormats
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
-                    bw.WriteSingle(UnkT00);
-                    bw.WriteSingle(Compare);
+                    bw.WriteSingle(EnableDist);
+                    bw.WriteSingle(TransitionDist);
                     bw.WriteByte(UnkT08);
                     bw.WriteByte(UnkT09);
                     bw.WriteInt16(UnkT0A);

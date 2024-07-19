@@ -93,6 +93,14 @@ public class EquipParamWeapon {
         GreatArrow = 83,
         Bolt = 85,
         BallistaBolt = 86,
-        Torch = 87 //Torch
+        Torch = 87, //Torch
+        HandToHandArts = 88, // Hand-to-Hand Arts
+        PerfumeBottle = 89, // Perfume Bottle
+        ThrustingShield = 90, // Thrusting Shield
+        ThrowingBlade = 91, // Throwing Blade
+        BackhandBlade = 92, // Backhand Blade
+        LightGreatsword = 93, // Light Greatsword
+        GreatKatana = 94, // Great Katana
+        BeastClaws = 95, // Beast Claw
     }
 }

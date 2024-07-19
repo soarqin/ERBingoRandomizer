@@ -1,4 +1,5 @@
 ﻿using System;
+using static SoulsFormats.FLVER;
 
 namespace SoulsFormats
 {
@@ -62,6 +63,9 @@ namespace SoulsFormats
                         case LayoutType.Float4:
                             return 16;
 
+                        case LayoutType.Unknown:
+                            return 4;
+
                         default:
                             throw new NotImplementedException($"No size defined for buffer layout type: {Type}");
                     }
@@ -77,6 +81,11 @@ namespace SoulsFormats
                 Type = type;
                 Semantic = semantic;
                 Index = index;
+            }
+
+            public LayoutMember Clone()
+            {
+                return (LayoutMember)MemberwiseClone();
             }
 
             internal LayoutMember(BinaryReaderEx br, int structOffset)
@@ -165,6 +174,11 @@ namespace SoulsFormats
             /// Four shorts.
             /// </summary>
             Short4toFloat4A = 0x1A,
+
+            /// <summary>
+            /// Unknown.
+            /// </summary>
+            Unknown = 0x2D,
 
             /// <summary>
             /// Unknown.

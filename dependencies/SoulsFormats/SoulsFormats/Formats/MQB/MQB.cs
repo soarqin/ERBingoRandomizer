@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using SoulsFormats;
 
 namespace SoulsFormats
 {
     /// <summary>
-    /// A cutscene definition format which dates back to at least Armored Core V, short for MovieSequencer Binary. Extension: .mqb
+    /// A cutscene definition format used since DS2, short for MovieSequencer Binary. Extension: .mqb
     /// </summary>
     public partial class MQB : SoulsFile<MQB>
     {
@@ -43,9 +42,9 @@ namespace SoulsFormats
         protected override void Read(BinaryReaderEx br)
         {
             br.AssertASCII("MQB ");
-            br.BigEndian = BigEndian = br.AssertSByte(0, -1) == -1;
+            br.BigEndian = BigEndian = br.AssertSByte([0, -1]) == -1;
             br.AssertByte(0);
-            sbyte longFormat = br.AssertSByte(0, -1);
+            sbyte longFormat = br.AssertSByte([0, -1]);
             br.AssertByte(0);
             Version = br.ReadEnum32<MQBVersion>();
             int headerSize = br.ReadInt32();
@@ -82,7 +81,7 @@ namespace SoulsFormats
             Framerate = br.ReadSingle();
             int resourceCount = br.ReadInt32();
             int cutCount = br.ReadInt32();
-            int unkX50 = br.ReadInt32();
+            br.AssertInt32(0);
             br.AssertInt32(0);
             br.AssertInt32(0);
             br.AssertInt32(0);

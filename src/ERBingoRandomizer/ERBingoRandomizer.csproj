@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net8.0-windows7.0</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
         <ApplicationIcon>icon.ico</ApplicationIcon>
@@ -35,7 +35,7 @@
         <Message Text="Moving Readme: $(PublishDir)" Importance="High" />
         <Message Text="Solution Dir: $(SolutionDir)" Importance="High" />
         <Copy SourceFiles="$(SolutionDir)README.md" DestinationFiles="$(PublishDir)README.txt" />
-        <Move SourceFiles="$(PublishDir)\$(AssemblyName).exe" DestinationFiles="$(PublishDir)\ERBingo Randomizer.exe" />
+        <Move SourceFiles="$(PublishDir)\$(AssemblyName).exe" DestinationFiles="$(PublishDir)\ERDLCBingoMod.exe" />
         <Message Text="Renamed executable file." Importance="high" />
         <!--<Exec Command="7za.exe a -t7z &quot;Elden Ring Debug Tool.7z&quot; .\bin\Publish\win-x64\* -xr!*.pdb" />
         <Move SourceFiles="Elden Ring Debug Tool.7z" DestinationFiles="$(PublishDir)..\Elden Ring Debug Tool $(AssemblyVersion).7z" />-->
@@ -66,7 +66,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="BouncyCastle.Cryptography" Version="2.3.0" />
+        <PackageReference Include="BouncyCastle.Cryptography" Version="2.4.0" />
         <PackageReference Include="SharpZipLib" Version="1.4.2" />
         <PackageReference Include="System.Drawing.Common" Version="8.0.0-preview.5.23280.5" />
     </ItemGroup>
@@ -81,12 +81,6 @@
         <Reference Include="System.Windows.Forms">
             <HintPath>C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Windows.Forms.dll</HintPath>
         </Reference>
-    </ItemGroup>
-
-
-    <ItemGroup>
-      <Compile Remove="Randomizer\GearRandomizer.cs" />
-      <Compile Remove="Randomizer\Init.cs" />
     </ItemGroup>
 
 </Project>

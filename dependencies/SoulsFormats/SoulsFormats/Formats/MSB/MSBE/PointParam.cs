@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Xml.Serialization;
-using SoulsFormats;
+using static SoulsFormats.MSBE.Region;
 
 namespace SoulsFormats
 {
@@ -1256,7 +1256,7 @@ namespace SoulsFormats
                 {
                     MessageID = br.ReadInt16();
                     UnkT02 = br.ReadInt16();
-                    Hidden = br.AssertInt32(0, 1) == 1;
+                    Hidden = br.AssertInt32([0, 1]) == 1;
                     UnkT08 = br.ReadInt32();
                     MessageSfxID = br.ReadInt32();
                     EnableEventFlagID = br.ReadUInt32();
@@ -1903,22 +1903,10 @@ namespace SoulsFormats
                 [MSBParamReference(ParamName = "WeatherLotParam")]
                 public int WeatherLotParamID { get; set; }
 
-                /// <summary>
-                /// Unknown.
-                /// </summary>
-                public byte UnkT08 { get; set; }
-                /// <summary>
-                /// Unknown.
-                /// </summary>
-                public byte UnkT09 { get; set; }
-                /// <summary>
-                /// Unknown.
-                /// </summary>
-                public byte UnkT0A { get; set; }
-                /// <summary>
-                /// Unknown.
-                /// </summary>
-                public byte UnkT0B { get; set; }
+                public sbyte UnkT08 { get; set; }
+                public sbyte UnkT09 { get; set; }
+                public sbyte UnkT0A { get; set; }
+                public sbyte UnkT0B { get; set; }
 
                 /// <summary>
                 /// Creates a WeatherOverride with default values.
@@ -1931,10 +1919,10 @@ namespace SoulsFormats
                 {
                     WeatherLotParamID = br.ReadInt32();
                     br.AssertInt32(-1);
-                    UnkT08 = br.ReadByte();
-                    UnkT09 = br.ReadByte();
-                    UnkT0A = br.ReadByte();
-                    UnkT0B = br.ReadByte();
+                    UnkT08 = br.ReadSByte();
+                    UnkT09 = br.ReadSByte();
+                    UnkT0A = br.ReadSByte();
+                    UnkT0B = br.ReadSByte();
                     br.AssertInt32(0);
                     br.AssertInt32(0);
                     br.AssertInt32(0);
@@ -1946,10 +1934,10 @@ namespace SoulsFormats
                 {
                     bw.WriteInt32(WeatherLotParamID);
                     bw.WriteInt32(-1);
-                    bw.WriteByte(UnkT08);
-                    bw.WriteByte(UnkT09);
-                    bw.WriteByte(UnkT0A);
-                    bw.WriteByte(UnkT0B);
+                    bw.WriteSByte(UnkT08);
+                    bw.WriteSByte(UnkT09);
+                    bw.WriteSByte(UnkT0A);
+                    bw.WriteSByte(UnkT0B);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);

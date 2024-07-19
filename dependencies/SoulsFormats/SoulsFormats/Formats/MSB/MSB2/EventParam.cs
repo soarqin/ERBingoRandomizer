@@ -460,6 +460,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [SupportsAlpha(true)]
                 public Color ColorT04 { get; set; }
 
                 /// <summary>
@@ -611,6 +612,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Presumably the position to be warped to.
                 /// </summary>
+                [PositionProperty]
                 public Vector3 Position { get; set; }
 
                 /// <summary>

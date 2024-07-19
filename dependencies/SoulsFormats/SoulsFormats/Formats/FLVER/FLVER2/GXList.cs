@@ -27,8 +27,11 @@ namespace SoulsFormats
             {
                 TerminatorID = int.MaxValue;
             }
-
-            internal GXList(BinaryReaderEx br, FLVERHeader header) : base()
+            public GXList Clone()
+            {
+                return (GXList)MemberwiseClone();
+            }
+            internal GXList(BinaryReaderEx br, FLVER2Header header) : base()
             {
                 if (header.Version < 0x20010)
                 {
@@ -47,7 +50,7 @@ namespace SoulsFormats
                 }
             }
 
-            internal void Write(BinaryWriterEx bw, FLVERHeader header)
+            internal void Write(BinaryWriterEx bw, FLVER2Header header)
             {
                 if (header.Version < 0x20010)
                 {
@@ -95,6 +98,10 @@ namespace SoulsFormats
                 Unk04 = 100;
                 Data = new byte[0];
             }
+            public GXItem Clone()
+            {
+                return (GXItem)MemberwiseClone();
+            }
 
             /// <summary>
             /// Creates a GXItem with the given values.
@@ -106,7 +113,7 @@ namespace SoulsFormats
                 Data = data;
             }
 
-            internal GXItem(BinaryReaderEx br, FLVERHeader header)
+            internal GXItem(BinaryReaderEx br, FLVER2Header header)
             {
                 if (header.Version <= 0x20010)
                 {
@@ -121,7 +128,7 @@ namespace SoulsFormats
                 Data = br.ReadBytes(length - 0xC);
             }
 
-            internal void Write(BinaryWriterEx bw, FLVERHeader header)
+            internal void Write(BinaryWriterEx bw, FLVER2Header header)
             {
                 if (header.Version <= 0x20010)
                 {

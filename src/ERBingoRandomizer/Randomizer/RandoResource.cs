@@ -26,7 +26,7 @@ public class RandoResource {
     internal readonly string Seed;
     internal int SeedInt;
     internal BHD5Reader Bhd5Reader;
-    internal IntPtr PodlePtr;
+    internal IntPtr OodlePtr;
     // FMGs
     internal BND4[] MenuMsgBnd = new BND4[Const.ERLanguageCount];
     internal FMG[] LineHelpFmg = new FMG[Const.ERLanguageCount];
@@ -75,11 +75,12 @@ public class RandoResource {
     }
 
     internal Task Init() {
+        OodlePtr = Kernel32.LoadLibrary($"{Path}/oo2core_6_win64.dll");
+        Oodle.OodleDirectory = Path;
+        _cancellationToken.ThrowIfCancellationRequested();
         if (!allCacheFilesExist()) {
             Bhd5Reader = new BHD5Reader(Path, Config.CacheBHDs, _cancellationToken);
         }
-        _cancellationToken.ThrowIfCancellationRequested();
-        PodlePtr = Kernel32.LoadLibrary($"{Path}/oo2core_6_win64.dll");
         _cancellationToken.ThrowIfCancellationRequested();
         getDefs();
         _cancellationToken.ThrowIfCancellationRequested();
@@ -91,8 +92,8 @@ public class RandoResource {
         _cancellationToken.ThrowIfCancellationRequested();
         buildDictionaries();
         _cancellationToken.ThrowIfCancellationRequested();
-        Kernel32.FreeLibrary(PodlePtr);
-        PodlePtr = IntPtr.Zero;
+        Kernel32.FreeLibrary(OodlePtr);
+        OodlePtr = IntPtr.Zero;
         return Task.CompletedTask;
     }
     private static bool allCacheFilesExist() {
@@ -113,7 +114,7 @@ public class RandoResource {
     }
     private void getFmgs() {
         for (int i = 0; i < Const.ERLanguageCount; i++) {
-            var filename = $"/msg/{Const.ERLanguageNames[i]}/item.msgbnd.dcx";
+            var filename = $"/msg/{Const.ERLanguageNames[i]}/item_dlc02.msgbnd.dcx";
             byte[] itemMsgBndBytes = getOrOpenFile(filename);
             if (itemMsgBndBytes == null) {
                 throw new InvalidFileException(filename);
@@ -126,7 +127,7 @@ public class RandoResource {
 
             _cancellationToken.ThrowIfCancellationRequested();
 
-            filename = $"/msg/{Const.ERLanguageNames[i]}/menu.msgbnd.dcx";
+            filename = $"/msg/{Const.ERLanguageNames[i]}/menu_dlc02.msgbnd.dcx";
             byte[] menuMsgBndBytes = getOrOpenFile(filename);
             if (itemMsgBndBytes == null) {
                 throw new InvalidFileException(filename);
@@ -356,6 +357,15 @@ public class RandoResource {
             case Const.ProtectorNameName:
                 ProtectorFmg = FMG.Read(file.Bytes);
                 break;
+            case Const.ProtectorDlc01NameName:
+            {
+                var fmg = FMG.Read(file.Bytes);
+                foreach (var pair in fmg.Entries)
+                {
+                    ProtectorFmg[pair.Key] = pair.Value;
+                }
+                break;
+            }
             case Const.GR_MenuTextName:
                 MenuTextFmg = FMG.Read(file.Bytes);
                 break;
@@ -367,9 +377,27 @@ public class RandoResource {
             case Const.WeaponNameName:
                 WeaponFmg[index] = FMG.Read(file.Bytes);
                 break;
+            case Const.WeaponNameDlc01Name:
+            {
+                var fmg = FMG.Read(file.Bytes);
+                foreach (var pair in fmg.Entries)
+                {
+                    WeaponFmg[index][pair.Key] = pair.Value;
+                }
+                break;
+            }
             case Const.GoodsNameName:
                 GoodsFmg[index] = FMG.Read(file.Bytes);
                 break;
+            case Const.GoodsNameDlc01Name:
+            {
+                var fmg = FMG.Read(file.Bytes);
+                foreach (var pair in fmg.Entries)
+                {
+                    GoodsFmg[index][pair.Key] = pair.Value;
+                }
+                break;
+            }
             case Const.GR_LineHelpName:
                 LineHelpFmg[index] = FMG.Read(file.Bytes);
                 break;

@@ -22,7 +22,6 @@ public struct RandomizeRule {
     public bool OpenGraces;
     public bool ReduceUpgradeMat;
     public int ReduceUpgradeMatType;
-    public bool GreaterItemLootChance;
     public KeyValuePair<int, int>[] StartupItems;
 }
 
@@ -34,7 +33,6 @@ public partial class BingoRandomizer {
     private readonly bool _randomWeapons;
     private readonly bool _openGraces;
     private readonly int _reduceUpgradeMatType;
-    private readonly bool _greaterItemLootChance;
     private readonly KeyValuePair<int, int>[] _startupItems;
     
     //static async method that behaves like a constructor    
@@ -53,7 +51,6 @@ public partial class BingoRandomizer {
         _randomWeapons = rule.RandomWeapons;
         _openGraces = rule.OpenGraces;
         _reduceUpgradeMatType = rule.ReduceUpgradeMat ? rule.ReduceUpgradeMatType : -1;
-        _greaterItemLootChance = rule.GreaterItemLootChance;
         _startupItems = rule.StartupItems;
         _classRandomizer = new Season3ClassRandomizer(new Season2LevelRandomizer(_resources.Random), _resources);
         _cancellationToken = cancellationToken;
@@ -89,7 +86,7 @@ public partial class BingoRandomizer {
         _cancellationToken.ThrowIfCancellationRequested();
         addStartupItems();
         _cancellationToken.ThrowIfCancellationRequested();
-        if (_greaterItemLootChance) {
+        if (_openGraces) {
             increaseItemLotChance();
             _cancellationToken.ThrowIfCancellationRequested();
         }
@@ -125,43 +122,69 @@ public partial class BingoRandomizer {
     private void addItemWithLotID(int id, int itemId, int itemCat, int itemCount)
     {
         Param.Row row = new Param.Row(id, "", _resources.ItemLotParamMap);
-        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemId01")?.SetValue(row, itemId);
-        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemCategory01")?.SetValue(row, itemCat);
-        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemBasePoint01")?.SetValue(row, (ushort)100);
-        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemNum01")?.SetValue(row, (byte)itemCount);
+        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemId01").SetValue(itemId);
+        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemCategory01").SetValue(itemCat);
+        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemBasePoint01").SetValue((ushort)100);
+        row.Cells.FirstOrDefault(c => c.Def.InternalName == "lotItemNum01").SetValue((byte)itemCount);
         _resources.ItemLotParamMap.AddRow(row);
     }
 
     private void addStartupItems()
     {
-        int newEventId = 279551112;  // Arbitrary number
         EMEVD common = _resources.CommonEmevd;
         if (common == null) {
             throw new InvalidOperationException($"Missing emevd {Const.CommonEventPath}");
         }
-        List<EMEVD.Instruction> newInstrs = new()
+        var newEventId = 279551112;
+        addItemWithLotID(70000, 0xB67, 1, 99);
+        List<EMEVD.Instruction> newInstrs =
+        [
+            new EMEVD.Instruction(1003, 2, new List<object> { (byte)0, (byte)1, (byte)0, (uint)510120 }),
+            // IfEventFlag(MAIN, ON, TargetEventFlagType.EventFlag, 510120)
+            new EMEVD.Instruction(3, 0, new List<object> { (sbyte)0, (byte)1, (byte)0, (uint)510120 }),
+            // AwardItemLot(70000)
+            new EMEVD.Instruction(2003, 4, new List<object> { 70000 }),
+            // EndEvent()
+            new EMEVD.Instruction(1000, 4, new List<object> { (byte)0 })
+        ];
+        var newEvent = new EMEVD.Event(newEventId, EMEVD.Event.RestBehaviorType.Default)
         {
-            // EndIfEventFlag(End, ON, TargetEventFlagType.EventFlag, 60000)
+            Instructions = newInstrs
+        };
+        common.Events.Add(newEvent);
+        var constrEvent = common.Events.Find(e => e.ID == 0);
+        if (constrEvent == null) {
+            throw new InvalidOperationException($"{Const.CommonEventPath} missing of required event: 0");
+        }
+        // Initialize new event
+        constrEvent.Instructions.Add(new EMEVD.Instruction(2000, 0, new List<object> { 0, newEventId, 0 }));
+
+        if (_startupItems.Length == 0) return;
+        newEventId = 279551113;  // Arbitrary number
+        newInstrs =
+        [
             new EMEVD.Instruction(1003, 2, new List<object> { (byte)0, (byte)1, (byte)0, (uint)60000 }),
             // IfEventFlag(MAIN, ON, TargetEventFlagType.EventFlag, 60000)
-            new EMEVD.Instruction(3, 0, new List<object> { (sbyte)0, (byte)1, (byte)0, (uint)60000 }),
-        };
+            new EMEVD.Instruction(3, 0, new List<object> { (sbyte)0, (byte)1, (byte)0, (uint)60000 })
+        ];
         for (int i = 0; i < _startupItems.Length; i++)
         {
             var (id, cat) = _startupItems[i];
-            addItemWithLotID(70000 + i, id, cat, 1);
+            addItemWithLotID(70001 + i, id, cat, 1);
             if (i % 10 == 0)
             {
-                // AwardItemLot(70000 + i)
-                newInstrs.Add(new EMEVD.Instruction(2003, 4, new List<object> { 70000 + i }));
+                // AwardItemLot(70001 + i)
+                newInstrs.Add(new EMEVD.Instruction(2003, 4, new List<object> { 70001 + i }));
             }
         }
         // EndEvent()
         newInstrs.Add(new EMEVD.Instruction(1000, 4, new List<object> { (byte)0 }));
-        EMEVD.Event newEvent = new EMEVD.Event(newEventId, EMEVD.Event.RestBehaviorType.Default);
-        newEvent.Instructions = newInstrs;
+        newEvent = new EMEVD.Event(newEventId, EMEVD.Event.RestBehaviorType.Default)
+        {
+            Instructions = newInstrs
+        };
         common.Events.Add(newEvent);
-        EMEVD.Event? constrEvent = common.Events.Find(e => e.ID == 0);
+        constrEvent = common.Events.Find(e => e.ID == 0);
         if (constrEvent == null) {
             throw new InvalidOperationException($"{Const.CommonEventPath} missing of required event: 0");
         }
@@ -171,7 +194,7 @@ public partial class BingoRandomizer {
 
     private void increaseItemLotChance()
     {
-        var cols = _resources.ItemLotParamEnemy.Cells;
+        var cols = _resources.ItemLotParamEnemy.Columns;
         Param.Column? itemId1Col = null;
         Param.Column? itemId2Col = null;
         Param.Column? itemId3Col = null;
@@ -580,20 +603,284 @@ public partial class BingoRandomizer {
         int altusId = 76303; // Altus Highway Junction
         int gelmirId = 76353; // Road of Iniquity
         List<int> bonfireFlags = new() {
-            71190, // Roundtable
-            // -- v1
-            76154, // Ailing Village Outskirts
-            76413, // Inner Aeonia
-            altusId, // Altus Highway Junction
-            gelmirId, // Road of Iniquity
-            71222, // Siofra River Bank
-            // -- v2
-            76521, // Snow Valley Ruins Overlook
-            76551, // Inner Consecrated Snowfield
-            71504, // Haligtree Roots
-            76203, // Scenic Isle
-            76225, // Ruined Labyrinth
-            71216, // Lake of Rot Shoreside
+            71190, // Table of Lost Grace / Roundtable Hold
+            76101, // Limgrave - Limgrave - The First Step
+            76100, // Limgrave - Limgrave - Church of Elleh
+            76111, // Limgrave - Limgrave - Gatefront
+            76120, // Limgrave - Limgrave - Waypoint Ruins Cellar
+            76103, // Limgrave - Limgrave - Artist's Shack (Limgrave)
+            76104, // Limgrave - Limgrave - Third Church of Marika
+            76105, // Limgrave - Limgrave - Fort Haight West
+            76106, // Limgrave - Limgrave - Agheel Lake South
+            76108, // Limgrave - Limgrave - Agheel Lake North
+            76110, // Limgrave - Limgrave - Church of Dragon Communion
+            76113, // Limgrave - Limgrave - Seaside Ruins
+            76114, // Limgrave - Limgrave - Mistwood Outskirts
+            76116, // Limgrave - Limgrave - Murkwater Coast
+            76119, // Limgrave - Limgrave - Summonwater Village Outskirts
+            73002, // Limgrave - Limgrave - Stormfoot Catacombs
+            73004, // Limgrave - Limgrave - Murkwater Catacombs
+            73103, // Limgrave - Limgrave - Groveside Cave
+            73115, // Limgrave - Limgrave - Coastal Cave
+            73100, // Limgrave - Limgrave - Murkwater Cave
+            73117, // Limgrave - Limgrave - Highroad Cave
+            73201, // Limgrave - Limgrave - Limgrave Tunnels
+            71800, // Limgrave - Stranded Graveyard - Cave of Knowledge
+            71801, // Limgrave - Stranded Graveyard - Stranded Graveyard
+            76102, // Limgrave - Stormhill - Stormhill Shack
+            71002, // Limgrave - Stormhill - Castleward Tunnel
+            76118, // Limgrave - Stormhill - Warmaster's Shack
+            76117, // Limgrave - Stormhill - Saintsbridge
+            73011, // Limgrave - Stormhill - Deathtouched Catacombs
+            73410, // Limgrave - Stormhill - Limgrave Tower Bridge
+            73412, // Limgrave - Stormhill - Divine Tower of Limgrave
+            76150, // Limgrave - Weeping Peninsula - Church of Pilgrimage
+            76151, // Limgrave - Weeping Peninsula - Castle Morne Rampart
+            76152, // Limgrave - Weeping Peninsula - Tombsward
+            76153, // Limgrave - Weeping Peninsula - South of the Lookout Tower
+            76154, // Limgrave - Weeping Peninsula - Ailing Village Outskirts
+            76155, // Limgrave - Weeping Peninsula - Beside the Crater-Pocked Glade
+            76156, // Limgrave - Weeping Peninsula - Isolated Merchant's Shack (Limgrave)
+            76162, // Limgrave - Weeping Peninsula - Fourth Church of Marika
+            76157, // Limgrave - Weeping Peninsula - Bridge of Sacrifice
+            76158, // Limgrave - Weeping Peninsula - Castle Morne Lift
+            76159, // Limgrave - Weeping Peninsula - Behind The Castle
+            76160, // Limgrave - Weeping Peninsula - Beside the Rampart Gaol
+            73001, // Limgrave - Weeping Peninsula - Impaler's Catacombs
+            73000, // Limgrave - Weeping Peninsula - Tombsward Catacombs
+            73101, // Limgrave - Weeping Peninsula - Earthbore Cave
+            73102, // Limgrave - Weeping Peninsula - Tombsward Cave
+            73200, // Limgrave - Weeping Peninsula - Morne Tunnel
+            71008, // Stormveil Castle - Stormveil Main Gate
+            71003, // Stormveil Castle - Gateside Chamber
+            71004, // Stormveil Castle - Stormveil Cliffside
+            71005, // Stormveil Castle - Rampart Tower
+            71006, // Stormveil Castle - Liftside Chamber
+            71007, // Stormveil Castle - Secluded Cell
+            76200, // Liurnia of the Lakes - Liurnia of the Lakes - Lake-Facing Cliffs
+            76202, // Liurnia of the Lakes - Liurnia of the Lakes - Laskyar Ruins
+            76201, // Liurnia of the Lakes - Liurnia of the Lakes - Liurnia Lake Shore
+            76204, // Liurnia of the Lakes - Liurnia of the Lakes - Academy Gate Town
+            76217, // Liurnia of the Lakes - Liurnia of the Lakes - Artist's Shack (Liurnia of the Lakes)
+            76223, // Liurnia of the Lakes - Liurnia of the Lakes - Eastern Liurnia Lake Shore
+            76222, // Liurnia of the Lakes - Liurnia of the Lakes - Gate Town Bridge
+            76221, // Liurnia of the Lakes - Liurnia of the Lakes - Liurnia Highway North
+            76244, // Liurnia of the Lakes - Liurnia of the Lakes - Liurnia Highway South
+            76206, // Liurnia of the Lakes - Liurnia of the Lakes - Main Academy Gate
+            76203, // Liurnia of the Lakes - Liurnia of the Lakes - Scenic Isle
+            76205, // Liurnia of the Lakes - Liurnia of the Lakes - South Raya Lucaria Gate
+            76225, // Liurnia of the Lakes - Liurnia of the Lakes - Ruined Labyrinth
+            76216, // Liurnia of the Lakes - Liurnia of the Lakes - Boilprawn Shack
+            76224, // Liurnia of the Lakes - Liurnia of the Lakes - Church of Vows
+            76237, // Liurnia of the Lakes - Liurnia of the Lakes - Converted Tower
+            76234, // Liurnia of the Lakes - Liurnia of the Lakes - Eastern Tableland
+            76236, // Liurnia of the Lakes - Liurnia of the Lakes - Fallen Ruins of the Lake
+            76219, // Liurnia of the Lakes - Liurnia of the Lakes - Folly on the Lake
+            76245, // Liurnia of the Lakes - Liurnia of the Lakes - Jarburg
+            76226, // Liurnia of the Lakes - Liurnia of the Lakes - Mausoleum Compound
+            76247, // Liurnia of the Lakes - Liurnia of the Lakes - Ranni's Chamber
+            76218, // Liurnia of the Lakes - Liurnia of the Lakes - Revenger's Shack
+            76215, // Liurnia of the Lakes - Liurnia of the Lakes - Slumbering Wolf's Shack
+            76220, // Liurnia of the Lakes - Liurnia of the Lakes - Village of the Albinaurics
+            76243, // Liurnia of the Lakes - Liurnia of the Lakes - Crystalline Woods
+            76242, // Liurnia of the Lakes - Liurnia of the Lakes - East Gate Bridge Trestle
+            76210, // Liurnia of the Lakes - Liurnia of the Lakes - Foot of the Four Belfries
+            76233, // Liurnia of the Lakes - Liurnia of the Lakes - Gate Town North
+            76214, // Liurnia of the Lakes - Liurnia of the Lakes - Main Caria Manor Gate
+            76231, // Liurnia of the Lakes - Liurnia of the Lakes - Manor Lower Level
+            76230, // Liurnia of the Lakes - Liurnia of the Lakes - Manor Upper Level
+            76212, // Liurnia of the Lakes - Liurnia of the Lakes - Northern Liurnia Lake Shore
+            76213, // Liurnia of the Lakes - Liurnia of the Lakes - Road to the Manor
+            76211, // Liurnia of the Lakes - Liurnia of the Lakes - Sorcerer's Isle
+            76241, // Liurnia of the Lakes - Liurnia of the Lakes - Temple Quarter
+            76227, // Liurnia of the Lakes - Liurnia of the Lakes - The Four Belfries
+            73106, // Liurnia of the Lakes - Liurnia of the Lakes - Academy Crystal Cave
+            76238, // Liurnia of the Lakes - Liurnia of the Lakes - Behind Caria Manor
+            73005, // Liurnia of the Lakes - Liurnia of the Lakes - Black Knife Catacombs
+            73006, // Liurnia of the Lakes - Liurnia of the Lakes - Cliffbottom Catacombs
+            73105, // Liurnia of the Lakes - Liurnia of the Lakes - Lakeside Crystal Cave
+            73421, // Liurnia of the Lakes - Liurnia of the Lakes - Liurnia Tower Bridge
+            76228, // Liurnia of the Lakes - Liurnia of the Lakes - Ranni's Rise
+            76229, // Liurnia of the Lakes - Liurnia of the Lakes - Ravine-Veiled Village
+            73202, // Liurnia of the Lakes - Liurnia of the Lakes - Raya Lucaria Crystal Tunnel
+            73003, // Liurnia of the Lakes - Liurnia of the Lakes - Road's End Catacombs
+            73104, // Liurnia of the Lakes - Liurnia of the Lakes - Stillwater Cave
+            73420, // Liurnia of the Lakes - Liurnia of the Lakes - Study Hall Entrance
+            76235, // Liurnia of the Lakes - Liurnia of the Lakes - The Ravine
+            73422, // Liurnia of the Lakes - Liurnia of the Lakes - Divine Tower of Liurnia
+            76208, // Liurnia of the Lakes - Bellum Highway - Bellum Church
+            76240, // Liurnia of the Lakes - Bellum Highway - Church of Inhibition
+            76207, // Liurnia of the Lakes - Bellum Highway - East Raya Lucaria Gate
+            76239, // Liurnia of the Lakes - Bellum Highway - Frenzied Flame Village Outskirts
+            76209, // Liurnia of the Lakes - Bellum Highway - Grand Lift of Dectus
+            73900, // Liurnia of the Lakes - Ruin-Strewn Precipice - Magma Wyrm
+            73901, // Liurnia of the Lakes - Ruin-Strewn Precipice - Ruin-Strewn Precipice
+            73902, // Liurnia of the Lakes - Ruin-Strewn Precipice - Ruin-Strewn Precipice Overlook
+            76252, // Liurnia of the Lakes - Moonlight Altar - Altar South
+            76251, // Liurnia of the Lakes - Moonlight Altar - Cathedral of Manus Celes
+            76250, // Liurnia of the Lakes - Moonlight Altar - Moonlight Altar
+            71402, // Academy of Raya Lucaria - Church of the Cuckoo
+            71403, // Academy of Raya Lucaria - Schoolhouse Classroom
+            76300, // Altus Plateau - Altus Plateau - Abandoned Coffin
+            76303, // Altus Plateau - Altus Plateau - Altus Highway Junction
+            76301, // Altus Plateau - Altus Plateau - Altus Plateau
+            76306, // Altus Plateau - Altus Plateau - Bower of Bounty
+            76302, // Altus Plateau - Altus Plateau - Erdtree-Gazing Hill
+            76304, // Altus Plateau - Altus Plateau - Forest-Spanning Greatbridge
+            76305, // Altus Plateau - Altus Plateau - Rampartside Path
+            76307, // Altus Plateau - Altus Plateau - Road of Iniquity Side Path
+            76321, // Altus Plateau - Altus Plateau - Shaded Castle Inner Gate
+            76320, // Altus Plateau - Altus Plateau - Shaded Castle Ramparts
+            76308, // Altus Plateau - Altus Plateau - Windmill Village
+            73205, // Altus Plateau - Altus Plateau - Altus Tunnel
+            73204, // Altus Plateau - Altus Plateau - Old Altus Tunnel
+            73118, // Altus Plateau - Altus Plateau - Perfumer's Grotto
+            73119, // Altus Plateau - Altus Plateau - Sage's Cave
+            73008, // Altus Plateau - Altus Plateau - Sainted Hero's Grave
+            73012, // Altus Plateau - Altus Plateau - Unsightly Catacombs
+            76350, // Altus Plateau - Mt. Gelmir - Bridge of Iniquity
+            76356, // Altus Plateau - Mt. Gelmir - Craftsman's Shack
+            76351, // Altus Plateau - Mt. Gelmir - First Mt. Gelmir Campsite
+            73009, // Altus Plateau - Mt. Gelmir - Gelmir Hero's Grave
+            76352, // Altus Plateau - Mt. Gelmir - Ninth Mt. Gelmir Campsite
+            76357, // Altus Plateau - Mt. Gelmir - Primeval Sorcerer Azur
+            76353, // Altus Plateau - Mt. Gelmir - Road of Iniquity
+            73107, // Altus Plateau - Mt. Gelmir - Seethewater Cave
+            76354, // Altus Plateau - Mt. Gelmir - Seethewater River
+            76355, // Altus Plateau - Mt. Gelmir - Seethewater Terminus
+            73109, // Altus Plateau - Mt. Gelmir - Volcano Cave
+            73007, // Altus Plateau - Mt. Gelmir - Wyndham Catacombs
+            73013, // Altus Plateau - Leyndell, Royal Capital - Auriza Side Tomb
+            73010, // Altus Plateau - Leyndell, Royal Capital - Auzira Hero's Grave
+            76314, // Altus Plateau - Leyndell, Royal Capital - Capital Rampart
+            73430, // Altus Plateau - Leyndell, Royal Capital - Divine Tower of West Altus
+            73432, // Altus Plateau - Leyndell, Royal Capital - Divine Tower of West Altus, --  Gate
+            76311, // Altus Plateau - Leyndell, Royal Capital - Hermit Merchant's Shack
+            76310, // Altus Plateau - Leyndell, Royal Capital - Minor Erdtree Church
+            76312, // Altus Plateau - Leyndell, Royal Capital - Outer Wall Battleground
+            76309, // Altus Plateau - Leyndell, Royal Capital - Outer Wall Phantom Tree
+            73431, // Altus Plateau - Leyndell, Royal Capital - Sealed Tunnel
+            71605, // Volcano Manor - Audience Pathway
+            71604, // Volcano Manor - Guest Hall
+            71603, // Volcano Manor - Prison Town Church
+            71607, // Volcano Manor - Subterranean Inquisition Chamber
+            71602, // Volcano Manor - Volcano Manor
+            71103, // Leyndell, Royal Capital - Leyndell, Royal Capital - Lower Capital Church
+            71102, // Leyndell, Royal Capital - Leyndell, Royal Capital - East Capital Rampart
+            71109, // Leyndell, Royal Capital - Leyndell, Royal Capital - Divine Bridge
+            71108, // Leyndell, Royal Capital - Leyndell, Royal Capital - Fortified Manor, First Floor
+            71107, // Leyndell, Royal Capital - Leyndell, Royal Capital - Queen's Bedchamber
+            71105, // Leyndell, Royal Capital - Leyndell, Royal Capital - West Capital Rampart
+            71104, // Leyndell, Royal Capital - Leyndell, Royal Capital - Avenue Balcony
+            73502, // Leyndell, Royal Capital - Subterranean Shunning-Grounds - Forsaken Depths
+            73504, // Leyndell, Royal Capital - Subterranean Shunning-Grounds - Frenzied Flame Proscription
+            73503, // Leyndell, Royal Capital - Subterranean Shunning-Grounds - Leyndell Catacombs
+            73501, // Leyndell, Royal Capital - Subterranean Shunning-Grounds - Underground Roadside
+            76403, // Caelid - Caelid - Caelem Ruins
+            76405, // Caelid - Caelid - Caelid Highway South
+            76404, // Caelid - Caelid - Cathedral of Dragon Communion
+            76415, // Caelid - Caelid - Chair-Crypt of Sellia
+            76418, // Caelid - Caelid - Church of the Plague
+            76402, // Caelid - Caelid - Fort Gael North
+            76401, // Caelid - Caelid - Rotview Balcony
+            76414, // Caelid - Caelid - Sellia Backstreets
+            76416, // Caelid - Caelid - Sellia Under-Stair
+            76400, // Caelid - Caelid - Smoldering Church
+            76409, // Caelid - Caelid - Smoldering Wall
+            76411, // Caelid - Caelid - Southern Aeonia Swamp Bank
+            73120, // Caelid - Caelid - Abandoned Cave
+            73015, // Caelid - Caelid - Caelid Catacombs
+            76420, // Caelid - Caelid - Chamber Outside the Plaza
+            76410, // Caelid - Caelid - Deep Siofra Well
+            73207, // Caelid - Caelid - Gael Tunnel
+            73121, // Caelid - Caelid - Gaol Cave
+            76417, // Caelid - Caelid - Impassable Greatbridge
+            73014, // Caelid - Caelid - Minor Erdtree Catacombs
+            73257, // Caelid - Caelid - Rear Gael Tunnel Entrance
+            73208, // Caelid - Caelid - Sellia Crystal Tunnel
+            73016, // Caelid - Caelid - War-Dead Catacombs
+            76406, // Caelid - Swamp of Aeonia - Aeonia Swamp Shore
+            76407, // Caelid - Swamp of Aeonia - Astray from Caelid Highway North
+            76413, // Caelid - Swamp of Aeonia - Inner Aeonia
+            76454, // Caelid - Greyoll's Dragonbarrow - Bestial Sanctum
+            73440, // Caelid - Greyoll's Dragonbarrow - Divine Tower of Caelid, --  Basement
+            73441, // Caelid - Greyoll's Dragonbarrow - Divine Tower of Caelid, --  Center
+            73110, // Caelid - Greyoll's Dragonbarrow - Dragonbarrow Cave
+            76452, // Caelid - Greyoll's Dragonbarrow - Dragonbarrow Fork
+            76450, // Caelid - Greyoll's Dragonbarrow - Dragonbarrow West
+            76456, // Caelid - Greyoll's Dragonbarrow - Farum Greatbridge
+            76453, // Caelid - Greyoll's Dragonbarrow - Fort Faroth
+            73460, // Caelid - Greyoll's Dragonbarrow - Isolated Divine Tower
+            76451, // Caelid - Greyoll's Dragonbarrow - Isolated Merchant's Shack (Greyoll's Dragonbarrow)
+            76455, // Caelid - Greyoll's Dragonbarrow - Lenne's Rise
+            73111, // Caelid - Greyoll's Dragonbarrow - Sellia Hideaway
+            73451, // Mountaintops of the Giants - Forbiden Lands - Divine Tower of the East Altus
+            73450, // Mountaintops of the Giants - Forbiden Lands - Divine Tower of the East Altus, --  Gate
+            76500, // Mountaintops of the Giants - Forbiden Lands - Forbidden Lands
+            76502, // Mountaintops of the Giants - Forbiden Lands - Grand Lift of Rold
+            73020, // Mountaintops of the Giants - Forbiden Lands - Hidden Path to the Haligtree
+            76503, // Mountaintops of the Giants - Mountaintops of the Giants - Ancient Snow Valley Ruins
+            76522, // Mountaintops of the Giants - Mountaintops of the Giants - Castle Sol Main Gate
+            76523, // Mountaintops of the Giants - Mountaintops of the Giants - Church of the Eclipse
+            76505, // Mountaintops of the Giants - Mountaintops of the Giants - First Church of Marika
+            76504, // Mountaintops of the Giants - Mountaintops of the Giants - Freezing Lake
+            76521, // Mountaintops of the Giants - Mountaintops of the Giants - Snow Valley Ruins Overlook
+            73122, // Mountaintops of the Giants - Mountaintops of the Giants - Spiritcaller's Cave
+            76520, // Mountaintops of the Giants - Mountaintops of the Giants - Whiteridge Road
+            76501, // Mountaintops of the Giants - Mountaintops of the Giants - Zamor Ruins
+            76507, // Mountaintops of the Giants - Flame Peak - Church of Repose
+            76508, // Mountaintops of the Giants - Flame Peak - Foot of the Forge
+            76510, // Mountaintops of the Giants - Flame Peak - Forge of the Giants
+            76506, // Mountaintops of the Giants - Flame Peak - Giant's Gravepost
+            73018, // Mountaintops of the Giants - Flame Peak - Giant's Mountaintop Catacombs
+            73017, // Mountaintops of the Giants - Flame Peak - Giant-Conquering Hero's Grave
+            76653, // Mountaintops of the Giants - Consecrated Snowfield - Apostate Derelict
+            73112, // Mountaintops of the Giants - Consecrated Snowfield - Cave of the Forlorn
+            76550, // Mountaintops of the Giants - Consecrated Snowfield - Consecrated Snowfield
+            73019, // Mountaintops of the Giants - Consecrated Snowfield - Consecrated Snowfield Catacombs
+            76551, // Mountaintops of the Giants - Consecrated Snowfield - Inner Consecrated Snowfield
+            76652, // Mountaintops of the Giants - Consecrated Snowfield - Ordina, Liturgical Town
+            73211, // Mountaintops of the Giants - Consecrated Snowfield - Yelough Anix Tunnel
+            71506, // Miquella's Haligtree - Miquella's Haligtree - Haligtree Canopy
+            71507, // Miquella's Haligtree - Miquella's Haligtree - Haligtree Town
+            71508, // Miquella's Haligtree - Miquella's Haligtree - Haligtree Town Plaza
+            71503, // Miquella's Haligtree - Elphael, Brace of the Haligtree - Drainage Channel
+            71502, // Miquella's Haligtree - Elphael, Brace of the Haligtree - Elphael Inner Wall
+            71504, // Miquella's Haligtree - Elphael, Brace of the Haligtree - Haligtree Roots
+            71501, // Miquella's Haligtree - Elphael, Brace of the Haligtree - Prayer Room
+            71310, // Crumbling Farum Azula - Beside the great Bridge
+            71303, // Crumbling Farum Azula - Crumbling Beast Grave
+            71304, // Crumbling Farum Azula - Crumbling Beast Grave Depths
+            71306, // Crumbling Farum Azula - Dragon Temple
+            71308, // Crumbling Farum Azula - Dragon Temple Lift
+            71309, // Crumbling Farum Azula - Dragon Temple Rooftop
+            71307, // Crumbling Farum Azula - Dragon Temple Transept
+            71305, // Crumbling Farum Azula - Tempest-Facing Balcony
+            71213, // Ainsel River - Ainsel River - Ainsel River Downstream
+            71212, // Ainsel River - Ainsel River - Ainsel River Sluice Gate
+            71211, // Ainsel River - Ainsel River - Ainsel River Well Depths
+            71214, // Ainsel River - Ainsel River Main - Ainsel River Main
+            71215, // Ainsel River - Ainsel River Main - Nokstella, Eternal City
+            71219, // Ainsel River - Ainsel River Main - Nokstella Waterfall Basin
+            71218, // Ainsel River - Lake of Rot - Grand Cloister
+            71216, // Ainsel River - Lake of Rot - Lake of Rot Shoreside
+            71271, // Nokron, Eternal City - Nokron, Eternal City - Nokron, Eternal City
+            71224, // Nokron, Eternal City - Nokron, Eternal City - Ancestral Woods
+            71225, // Nokron, Eternal City - Nokron, Eternal City - Aqueduct-Facing Cliffs
+            71220, // Nokron, Eternal City - Nokron, Eternal City - Great Waterfall Basin
+            71226, // Nokron, Eternal City - Nokron, Eternal City - Night's Sacred Ground
+            71227, // Nokron, Eternal City - Siofra River - Below the Well
+            71222, // Nokron, Eternal City - Siofra River - Siofra River Bank
+            71270, // Nokron, Eternal City - Siofra River - Siofra River Well Depths
+            71223, // Nokron, Eternal City - Siofra River - Worshippers' Woods
+            71252, // Nokron, Eternal City - Mohgwyn Palace - Dynasty Mausoleum Entrance
+            71253, // Nokron, Eternal City - Mohgwyn Palace - Dynasty Mausoleum Midpoint
+            71251, // Nokron, Eternal City - Mohgwyn Palace - Palace Approach Ledge-Road
+            71235, // Deeproot Depths - Across the Roots
+            71233, // Deeproot Depths - Deeproot Depths
+            71232, // Deeproot Depths - Great Waterfall Crest
+            71231, // Deeproot Depths - Root-Facing Cliffs
+            71234, // Deeproot Depths - The Nameless Eternal City
         };
         List<int> mapFlags = new() {
             62010,  // Map: Limgrave, West
@@ -627,8 +914,10 @@ public partial class BingoRandomizer {
         }
         List<EMEVD.Instruction> newInstrs = new()
         {
+            // EndIfEventFlag(End, ON, TargetEventFlagType.EventFlag, 60000)
+            new EMEVD.Instruction(1003, 2, new List<object> { (byte)0, (byte)1, (byte)0, (uint)60100 }),
             // IfEventFlag(MAIN, ON, TargetEventFlagType.EventFlag, 60100)
-            new EMEVD.Instruction(3, 0, new List<object> { (sbyte)0, (byte)1, (byte)0, 60100 }),
+            new EMEVD.Instruction(3, 0, new List<object> { (sbyte)0, (byte)1, (byte)0, (uint)60100 }),
             // OpenWorldMapPoint(111000, 100)
             // (May be redundant to unlocking all maps)
             new EMEVD.Instruction(2003, 78, new List<object> { 111000, 100f }),

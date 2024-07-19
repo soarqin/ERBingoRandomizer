@@ -177,21 +177,25 @@ namespace SoulsFormats
             /// <summary>
             /// A path to a .sib file, presumed to be some kind of editor placeholder.
             /// </summary>
+            [IgnoreProperty]
             public string SibPath { get; set; }
 
             /// <summary>
             /// Location of the part.
             /// </summary>
+            [PositionProperty]
             public Vector3 Position { get; set; }
 
             /// <summary>
             /// Rotation of the part, in degrees.
             /// </summary>
+            [RotationProperty]
             public Vector3 Rotation { get; set; }
 
             /// <summary>
             /// Scale of the part, only meaningful for map pieces and objects.
             /// </summary>
+            [ScaleProperty]
             public Vector3 Scale { get; set; }
 
             /// <summary>
@@ -207,6 +211,7 @@ namespace SoulsFormats
             /// <summary>
             /// Identifies the part in external files.
             /// </summary>
+            [EnemyProperty]
             public int EntityID { get; set; }
 
             /// <summary>
@@ -252,46 +257,55 @@ namespace SoulsFormats
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte LanternID { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte LodParamID { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte IsShadowSrc { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte IsShadowDest { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte IsShadowOnly { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte DrawByReflectCam { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte DrawOnlyReflectCam { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte UseDepthBiasFloat { get; set; }
 
             /// <summary>
             /// Unknown.
             /// </summary>
+            [IgnoreProperty]
             public byte DisablePointLightEffect { get; set; }
 
             private protected Part(string name)
@@ -455,7 +469,7 @@ namespace SoulsFormats
 
             internal virtual void GetIndices(MSB1 msb, Entries entries)
             {
-                ModelIndex = MSB.FindIndex(entries.Models, ModelName);
+                ModelIndex = MSB.FindIndex(this, entries.Models, ModelName);
             }
 
             /// <summary>
@@ -493,8 +507,11 @@ namespace SoulsFormats
                 /// <summary>
                 /// Collision that controls loading of the object.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Collision))]
+                [NoRenderGroupInheritence()]
                 public string CollisionName { get; set; }
-                private int CollisionIndex;
+                [IndexProperty]
+                public int CollisionIndex { get; set; }
 
                 /// <summary>
                 /// Unknown.
@@ -514,6 +531,7 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public short UnkT0E { get; set; }
 
                 /// <summary>
@@ -560,7 +578,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB1 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    CollisionIndex = MSB.FindIndex(entries.Parts, CollisionName);
+                    CollisionIndex = MSB.FindIndex(this, entries.Parts, CollisionName);
                 }
             }
 
@@ -587,53 +605,70 @@ namespace SoulsFormats
                 /// <summary>
                 /// ID in NPCThinkParam determining AI properties.
                 /// </summary>
+                [MSBParamReference(ParamName = "NpcThinkParam")]
+                [EnemyProperty]
                 public int ThinkParamID { get; set; }
 
                 /// <summary>
                 /// ID in NPCParam determining character properties.
                 /// </summary>
+                [MSBParamReference(ParamName = "NpcParam")]
+                [EnemyProperty]
                 public int NPCParamID { get; set; }
 
                 /// <summary>
                 /// ID of a talk ESD used by the character.
                 /// </summary>
+                [EnemyProperty]
                 public int TalkID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [EnemyProperty]
                 public byte PointMoveType { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [EnemyProperty]
                 public ushort PlatoonID { get; set; }
 
                 /// <summary>
                 /// ID in CharaInitParam determining equipment and stats for humans.
                 /// </summary>
+                [EnemyProperty]
+                [MSBParamReference(ParamName = "CharaInitParam")]
                 public int CharaInitID { get; set; }
 
                 /// <summary>
                 /// Collision that controls loading of the enemy.
                 /// </summary>
+                [EnemyProperty]
+                [MSBReference(ReferenceType = typeof(Collision))]
                 public string CollisionName { get; set; }
-                private int CollisionIndex;
+                [IndexProperty]
+                public int CollisionIndex { get; set; }
 
                 /// <summary>
                 /// Regions for the enemy to patrol.
                 /// </summary>
-                public string[] MovePointNames { get; private set; }
-                private short[] MovePointIndices;
+                [EnemyProperty]
+                [MSBReference(ReferenceType = typeof(Region))]
+                public string[] MovePointNames { get; set; }
+                [IndexProperty]
+                public short[] MovePointIndices { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [EnemyProperty]
                 public int InitAnimID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [EnemyProperty]
                 public int DamageAnimID { get; set; }
 
                 private protected EnemyBase() : base("cXXXX_XXXX")
@@ -704,11 +739,11 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB1 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    CollisionIndex = MSB.FindIndex(entries.Parts, CollisionName);
+                    CollisionIndex = MSB.FindIndex(this, entries.Parts, CollisionName);
 
                     MovePointIndices = new short[MovePointNames.Length];
                     for (int i = 0; i < MovePointNames.Length; i++)
-                        MovePointIndices[i] = (short)MSB.FindIndex(entries.Regions, MovePointNames[i]);
+                        MovePointIndices[i] = (short)MSB.FindIndex(this, entries.Regions, MovePointNames[i]);
                 }
             }
 
@@ -776,8 +811,11 @@ namespace SoulsFormats
                 public byte SoundSpaceType { get; set; }
 
                 /// <summary>
-                /// Unknown.
+                /// Environment lighting
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Event.Environment))]
+                public string EnvLightMapSpotName { get; set; }
+                [IndexProperty]
                 public short EnvLightMapSpotIndex { get; set; }
 
                 /// <summary>
@@ -808,12 +846,31 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [IgnoreProperty]
                 public byte UnkT27 { get; set; }
 
                 /// <summary>
                 /// If set, disables a bonfire when any enemy is on the collision.
                 /// </summary>
                 public int DisableBonfireEntityID { get; set; }
+
+                /// <summary>
+                /// Unknown value only used in m99 maps.
+                /// </summary>
+                [IgnoreProperty]
+                public int M99Unk00 { get; set; }
+
+                /// <summary>
+                /// Unknown value only used in m99 maps.
+                /// </summary>
+                [IgnoreProperty]
+                public int M99Unk04 { get; set; }
+
+                /// <summary>
+                /// Unknown value only used in m99 maps.
+                /// </summary>
+                [IgnoreProperty]
+                public int M99Unk08 { get; set; }
 
                 /// <summary>
                 /// An ID used for multiplayer eligibility.
@@ -823,11 +880,13 @@ namespace SoulsFormats
                 /// <summary>
                 /// ID in LockCamParam determining camera properties.
                 /// </summary>
+                [MSBParamReference(ParamName = "LockCamParam")]
                 public short LockCamParamID1 { get; set; }
 
                 /// <summary>
                 /// ID in LockCamParam determining camera properties.
                 /// </summary>
+                [MSBParamReference(ParamName = "LockCamParam")]
                 public short LockCamParamID2 { get; set; }
 
                 /// <summary>
@@ -865,9 +924,9 @@ namespace SoulsFormats
                     DisableStart = br.ReadBoolean();
                     UnkT27 = br.ReadByte();
                     DisableBonfireEntityID = br.ReadInt32();
-                    br.AssertInt32(-1);
-                    br.AssertInt32(-1);
-                    br.AssertInt32(-1);
+                    M99Unk00 = br.ReadInt32();
+                    M99Unk04 = br.ReadInt32();
+                    M99Unk08 = br.ReadInt32();
                     PlayRegionID = br.ReadInt32();
                     LockCamParamID1 = br.ReadInt16();
                     LockCamParamID2 = br.ReadInt16();
@@ -889,9 +948,9 @@ namespace SoulsFormats
                     bw.WriteBoolean(DisableStart);
                     bw.WriteByte(UnkT27);
                     bw.WriteInt32(DisableBonfireEntityID);
-                    bw.WriteInt32(-1);
-                    bw.WriteInt32(-1);
-                    bw.WriteInt32(-1);
+                    bw.WriteInt32(M99Unk00);
+                    bw.WriteInt32(M99Unk04);
+                    bw.WriteInt32(M99Unk08);
                     bw.WriteInt32(PlayRegionID);
                     bw.WriteInt16(LockCamParamID1);
                     bw.WriteInt16(LockCamParamID2);
@@ -899,6 +958,18 @@ namespace SoulsFormats
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
                     bw.WriteInt32(0);
+                }
+
+                internal override void GetNames(MSB1 msb, Entries entries)
+                {
+                    base.GetNames(msb, entries);
+                    EnvLightMapSpotName = MSB.FindName(entries.Events.FindAll(e => e.GetType() == typeof(MSB1.Event.Environment)), EnvLightMapSpotIndex);
+                }
+
+                internal override void GetIndices(MSB1 msb, Entries entries)
+                {
+                    base.GetIndices(msb, entries);
+                    EnvLightMapSpotIndex = (short)MSB.FindIndex(this, entries.Events.FindAll(e => e.GetType() == typeof(MSB1.Event.Environment)), EnvLightMapSpotName);
                 }
             }
 
@@ -990,8 +1061,10 @@ namespace SoulsFormats
                 /// <summary>
                 /// The collision which will load another map.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Collision))]
                 public string CollisionName { get; set; }
-                private int CollisionIndex;
+                [IndexProperty]
+                public int CollisionIndex { get; set; }
 
                 /// <summary>
                 /// Four bytes specifying the map ID to load.
@@ -1039,7 +1112,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB1 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    CollisionIndex = MSB.FindIndex(msb.Parts.Collisions, CollisionName);
+                    CollisionIndex = MSB.FindIndex(this, msb.Parts.Collisions, CollisionName);
                 }
             }
         }

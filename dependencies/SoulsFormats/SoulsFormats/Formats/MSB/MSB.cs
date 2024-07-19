@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using SoulsFormats;
 
 namespace SoulsFormats
 {
@@ -52,11 +51,11 @@ namespace SoulsFormats
             {
                 ambiguous = false;
                 var nameCounts = new Dictionary<string, int>();
-
+                
                 // Some entries have blank names but are referenced, which means they all must be
                 // disambiguated.
                 nameCounts[""] = 0;
-
+                
                 foreach (IMsbEntry entry in entries)
                 {
                     string name = entry.Name;

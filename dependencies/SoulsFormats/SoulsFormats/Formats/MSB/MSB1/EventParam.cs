@@ -221,14 +221,18 @@ namespace SoulsFormats
             /// <summary>
             /// Part referenced by the event.
             /// </summary>
+            [MSBReference(ReferenceType = typeof(Part))]
             public string PartName { get; set; }
-            private int PartIndex;
+            [IndexProperty]
+            public int PartIndex { get; set; }
 
             /// <summary>
             /// Region referenced by the event.
             /// </summary>
+            [MSBReference(ReferenceType = typeof(Region))]
             public string RegionName { get; set; }
-            private int RegionIndex;
+            [IndexProperty]
+            public int RegionIndex { get; set; }
 
             /// <summary>
             /// Identifies the event in external files.
@@ -323,8 +327,8 @@ namespace SoulsFormats
 
             internal virtual void GetIndices(MSB1 msb, Entries entries)
             {
-                PartIndex = MSB.FindIndex(entries.Parts, PartName);
-                RegionIndex = MSB.FindIndex(entries.Regions, RegionName);
+                PartIndex = MSB.FindIndex(this, entries.Parts, PartName);
+                RegionIndex = MSB.FindIndex(this, entries.Regions, RegionName);
             }
 
             /// <summary>
@@ -549,12 +553,15 @@ namespace SoulsFormats
                 /// <summary>
                 /// The part that the treasure is attached to, such as an item corpse.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Part))]
                 public string TreasurePartName { get; set; }
-                private int TreasurePartIndex;
+                [IndexProperty]
+                public int TreasurePartIndex { get; set; }
 
                 /// <summary>
                 /// Item lots to be granted when the treasure is picked up; only the first appears to be functional.
                 /// </summary>
+                [MSBParamReference(ParamName = "ItemLotParam")]
                 public int[] ItemLots { get; private set; }
 
                 /// <summary>
@@ -621,7 +628,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB1 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    TreasurePartIndex = MSB.FindIndex(entries.Parts, TreasurePartName);
+                    TreasurePartIndex = MSB.FindIndex(this, entries.Parts, TreasurePartName);
                 }
             }
 
@@ -675,14 +682,18 @@ namespace SoulsFormats
                 /// <summary>
                 /// Points that enemies may be spawned at.
                 /// </summary>
-                public string[] SpawnPointNames { get; private set; }
-                private int[] SpawnPointIndices;
+                [MSBReference(ReferenceType = typeof(Region))]
+                public string[] SpawnPointNames { get; set; }
+                [IndexProperty]
+                public int[] SpawnPointIndices { get; set; }
 
                 /// <summary>
                 /// Enemies to be respawned.
                 /// </summary>
-                public string[] SpawnPartNames { get; private set; }
-                private int[] SpawnPartIndices;
+                [MSBReference(ReferenceType = typeof(Part))]
+                public string[] SpawnPartNames { get; set; }
+                [IndexProperty]
+                public int[] SpawnPartIndices { get; set; }
 
                 /// <summary>
                 /// Creates a Generator with default values.
@@ -744,8 +755,8 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB1 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    SpawnPointIndices = MSB.FindIndices(entries.Regions, SpawnPointNames);
-                    SpawnPartIndices = MSB.FindIndices(entries.Parts, SpawnPartNames);
+                    SpawnPointIndices = MSB.FindIndices(this, entries.Regions, SpawnPointNames);
+                    SpawnPartIndices = MSB.FindIndices(this, entries.Parts, SpawnPartNames);
                 }
             }
 
@@ -824,18 +835,21 @@ namespace SoulsFormats
                 /// <summary>
                 /// The object that the ObjAct controls.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Part))]
                 public string ObjActPartName { get; set; }
-                private int ObjActPartIndex;
+                [IndexProperty]
+                public int ObjActPartIndex { get; set; }
 
                 /// <summary>
                 /// ID in ObjActParam that configures the ObjAct.
                 /// </summary>
+                [MSBParamReference(ParamName = "ObjActParam")]
                 public short ObjActParamID { get; set; }
 
                 /// <summary>
                 /// Unknown.
                 /// </summary>
-                public StateType ObjActState { get; set; }
+                public StateType ObjActState { get; set; } = StateType.Default;
 
                 /// <summary>
                 /// Unknown, probably enables or disables the ObjAct.
@@ -883,7 +897,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB1 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    ObjActPartIndex = MSB.FindIndex(entries.Parts, ObjActPartName);
+                    ObjActPartIndex = MSB.FindIndex(this, entries.Parts, ObjActPartName);
                 }
             }
 
@@ -897,8 +911,10 @@ namespace SoulsFormats
                 /// <summary>
                 /// Point for the SpawnPoint to spawn at.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Region))]
                 public string SpawnPointName { get; set; }
-                private int SpawnPointIndex;
+                [IndexProperty]
+                public int SpawnPointIndex { get; set; }
 
                 /// <summary>
                 /// Creates a SpawnPoint with default values.
@@ -932,7 +948,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB1 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    SpawnPointIndex = MSB.FindIndex(entries.Regions, SpawnPointName);
+                    SpawnPointIndex = MSB.FindIndex(this, entries.Regions, SpawnPointName);
                 }
             }
 
@@ -946,12 +962,13 @@ namespace SoulsFormats
                 /// <summary>
                 /// Position of the map.
                 /// </summary>
+                [PositionProperty]
                 public Vector3 Position { get; set; }
 
                 /// <summary>
                 /// Rotation of the map.
                 /// </summary>
-                public float Degree { get; set; }
+                public float RotationY { get; set; }
 
                 /// <summary>
                 /// Creates a MapOffset with default values.
@@ -963,13 +980,13 @@ namespace SoulsFormats
                 private protected override void ReadTypeData(BinaryReaderEx br)
                 {
                     Position = br.ReadVector3();
-                    Degree = br.ReadSingle();
+                    RotationY = br.ReadSingle();
                 }
 
                 private protected override void WriteTypeData(BinaryWriterEx bw)
                 {
                     bw.WriteVector3(Position);
-                    bw.WriteSingle(Degree);
+                    bw.WriteSingle(RotationY);
                 }
             }
 
@@ -983,8 +1000,10 @@ namespace SoulsFormats
                 /// <summary>
                 /// Unknown.
                 /// </summary>
+                [MSBReference(ReferenceType = typeof(Region))]
                 public string NavmeshRegionName { get; set; }
-                private int NavmeshRegionIndex;
+                [IndexProperty]
+                public int NavmeshRegionIndex { get; set; }
 
                 /// <summary>
                 /// Creates a Navmesh with default values.
@@ -1018,7 +1037,7 @@ namespace SoulsFormats
                 internal override void GetIndices(MSB1 msb, Entries entries)
                 {
                     base.GetIndices(msb, entries);
-                    NavmeshRegionIndex = MSB.FindIndex(entries.Regions, NavmeshRegionName);
+                    NavmeshRegionIndex = MSB.FindIndex(this, entries.Regions, NavmeshRegionName);
                 }
             }
 

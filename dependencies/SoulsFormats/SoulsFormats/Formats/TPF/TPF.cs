@@ -66,8 +66,8 @@ namespace SoulsFormats
             br.ReadInt32(); // Data length
             int fileCount = br.ReadInt32();
             br.Skip(1); // Platform
-            Flag2 = br.AssertByte(0, 1, 2, 3);
-            Encoding = br.AssertByte(0, 1, 2);
+            Flag2 = br.AssertByte([0, 1, 2, 3]);
+            Encoding = br.AssertByte([0, 1, 2]);
             br.AssertByte(0);
 
             Textures = new List<Texture>(fileCount);
@@ -123,6 +123,7 @@ namespace SoulsFormats
             /// The name of the texture; should not include a path or extension.
             /// </summary>
             public string Name { get; set; }
+            public string CachedName { get; set; }
 
             /// <summary>
             /// Indicates format of the texture.
@@ -147,7 +148,7 @@ namespace SoulsFormats
             /// <summary>
             /// The raw data of the texture.
             /// </summary>
-            public byte[] Bytes { get; set; }
+            public Memory<byte> Bytes { get; set; }
 
             /// <summary>
             /// Extended metadata present in headerless console TPF textures.
@@ -164,6 +165,7 @@ namespace SoulsFormats
             /// </summary>
             public Texture()
             {
+                CachedName = null;
                 Name = "Unnamed";
                 Bytes = new byte[0];
             }
@@ -173,6 +175,7 @@ namespace SoulsFormats
             /// </summary>
             public Texture(string name, byte format, byte flags1, byte[] bytes)
             {
+                CachedName = null;
                 Name = name;
                 Format = format;
                 Flags1 = flags1;
@@ -183,8 +186,6 @@ namespace SoulsFormats
                     Type = TexType.Cubemap;
                 else if (dds.dwCaps2.HasFlag(DDS.DDSCAPS2.VOLUME))
                     Type = TexType.Volume;
-                else if (dds.header10?.arraySize == 2)
-                    Type = TexType.TextureArray;
                 else
                     Type = TexType.Texture;
                 Mipmaps = (byte)dds.dwMipMapCount;
@@ -192,13 +193,15 @@ namespace SoulsFormats
 
             internal Texture(BinaryReaderEx br, TPFPlatform platform, byte flag2, byte encoding)
             {
+                CachedName = null;
+
                 uint fileOffset = br.ReadUInt32();
                 int fileSize = br.ReadInt32();
 
                 Format = br.ReadByte();
                 Type = br.ReadEnum8<TexType>();
                 Mipmaps = br.ReadByte();
-                Flags1 = br.AssertByte(0, 1, 2, 3, 128);
+                Flags1 = br.AssertByte([0, 1, 2, 3]);
 
                 if (platform != TPFPlatform.PC)
                 {
@@ -214,17 +217,17 @@ namespace SoulsFormats
                     {
                         Header.Unk1 = br.ReadInt32();
                         if (flag2 != 0)
-                            Header.Unk2 = br.AssertInt32(0, 0x69E0, 0xAAE4);
+                            Header.Unk2 = br.AssertInt32([0, 0x69E0, 0xAAE4]);
                     }
                     else if (platform == TPFPlatform.PS4 || platform == TPFPlatform.Xbone)
                     {
-                        Header.TextureCount = br.AssertInt32(1, 6);
+                        Header.TextureCount = br.AssertInt32([1, 6]);
                         Header.Unk2 = br.AssertInt32(0xD);
                     }
                 }
 
                 uint nameOffset = br.ReadUInt32();
-                bool hasFloatStruct = br.AssertInt32(0, 1) == 1;
+                bool hasFloatStruct = br.AssertInt32([0, 1]) == 1;
 
                 if (platform == TPFPlatform.PS4 || platform == TPFPlatform.Xbone)
                     Header.DXGIFormat = br.ReadInt32();
@@ -255,8 +258,6 @@ namespace SoulsFormats
                         Type = TexType.Cubemap;
                     else if (dds.dwCaps2.HasFlag(DDS.DDSCAPS2.VOLUME))
                         Type = TexType.Volume;
-                    else if (dds.header10?.arraySize == 2)
-                        Type = TexType.TextureArray;
                     else
                         Type = TexType.Texture;
                     Mipmaps = (byte)dds.dwMipMapCount;
@@ -315,18 +316,18 @@ namespace SoulsFormats
             {
                 bw.FillUInt32($"FileData{index}", (uint)bw.Position);
 
-                byte[] bytes = Bytes;
+                Memory<byte> bytes = Bytes;
                 if (Flags1 == 2 || Flags1 == 3)
-                    bytes = DCX.Compress(bytes, DCX.Type.DCP_EDGE);
+                    bytes = DCX.Compress(bytes.Span, DCX.Type.DCP_EDGE);
 
                 bw.FillInt32($"FileSize{index}", bytes.Length);
-                bw.WriteBytes(bytes);
+                bw.WriteBytes(bytes.Span);
             }
 
             /// <summary>
             /// Attempt to create a full DDS file from headerless console textures. Very very very poor support at the moment.
             /// </summary>
-            public byte[] Headerize()
+            public Memory<byte> Headerize()
             {
                 return Headerizer.Headerize(this);
             }
@@ -392,9 +393,9 @@ namespace SoulsFormats
             Volume = 2,
 
             /// <summary>
-            /// New texture type in AC6 AET TPFs. Always contains 2 textures in a DX10 array.
+            /// Unknown
             /// </summary>
-            TextureArray = 3,
+            UnknownAC6 = 3,
         }
 
         /// <summary>
